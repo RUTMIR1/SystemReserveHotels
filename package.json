@@ -1,0 +1,29 @@
+{
+  "name": "systemreservehotels",
+  "version": "1.0.0",
+  "description": "this is a SystemReserveHotels",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon run src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RUTMIR1/SystemReserveHotels.git"
+  },
+  "author": "Delgado Milton",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RUTMIR1/SystemReserveHotels/issues"
+  },
+  "homepage": "https://github.com/RUTMIR1/SystemReserveHotels#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0",
+    "zod": "^3.24.1"
+  }
+}
