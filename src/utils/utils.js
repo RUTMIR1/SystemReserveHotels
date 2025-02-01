@@ -10,7 +10,7 @@ export const migrationDatabase = async (pathMigration, connection)=>{
     if(files.length === 0) throw new Error('0 archives for migration database');
     for(const file of files){
         let fileContent = await readFile(pathMigration+file, 'utf-8');
-        const instructions = fileContent.split(';').filter(el=> el.trim() !== '');
+        const instructions = fileContent.split('#').filter(el=> el.trim() !== '');
         for(const instruction of instructions){
             try{
                 await connection.query(instruction);

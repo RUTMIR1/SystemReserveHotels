@@ -5,7 +5,7 @@ const UserSchema = z.object({
         required_error: 'User name is required',
         invalid_type_error: 'User name must be a String'
     }).regex(/^[A-Za-zÁÉÍÓÚáéíóú]*$/, 'User name invalid'),
-    lastName: z.string({
+    last_name: z.string({
         required_error: 'User lastName is required',
         invalid_type_error: 'User lastName must be a string'
     }).regex(/^[A-Za-zÁÉÍÓÚáéíóú]*$/, 'User lastName invalid'),
@@ -29,13 +29,17 @@ const UserSchema = z.object({
         min_length: 8,
         max_length: 20,
         message: 'User password must be between 8 and 20 characters long',
+    }),
+    phone_number: z.string({
+        required_error: 'User phone number is required',
+        invalid_type_error: 'User phone number must be a string'
     })
 })
 
-export const userValidation = (user)=>{
+export const userValidation = async (user)=>{
     return UserSchema.safeParse(user);
 }
 
-export const userValidationPartial = (user)=>{
+export const userValidationPartial = async (user)=>{
     return UserSchema.partial().safeParse(user);
 }

@@ -16,8 +16,8 @@ export const querySql = async (query, data=[])=>{
     try{
         connection = await cnn.getConnection();
         return connection.query(query, data);
-    }catch(e){
-        throw new Error(`Error query: ${e.message}`);
+    }catch(err){
+        throw new Error(err.message);
     }finally{
         if(connection) connection.release();
     }
@@ -25,14 +25,14 @@ export const querySql = async (query, data=[])=>{
 export const queryTransactionSql = async (query, data=null)=>{
     let connection;
     try{
-        let result;
         connection = await cnn.getConnection();
         await connection.beginTransaction();
-        result = await connection.query(query, data);
+        let result = await connection.query(query, data);
         await connection.commit();
         return result;
-    }catch(e){
-        throw new Error(`Error query: ${e.message}`);
+    }catch(err){
+        await connection.rollback();
+        throw new Error(err.message);
     }finally{
         if(connection) connection.release();
     }
