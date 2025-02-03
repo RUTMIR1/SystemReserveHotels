@@ -1,6 +1,6 @@
 import z from 'zod';
-
 const UserSchema = z.object({
+    id: z.string().uuid().optional(),
     name: z.string({
         required_error: 'User name is required',
         invalid_type_error: 'User name must be a String'
@@ -33,6 +33,13 @@ const UserSchema = z.object({
     phone_number: z.string({
         required_error: 'User phone number is required',
         invalid_type_error: 'User phone number must be a string'
+    }),
+    rol: z.object({id: z.string({
+        required_error: 'Rol ID is required',
+        invalid_type_error: 'Rol ID must be a string'
+    }).uuid({message: 'Rol ID must be a UUID string'})}, {
+        required_error: 'Rol is required',
+        invalid_type_error: 'Rol must be an object'
     })
 })
 

@@ -2,6 +2,21 @@ import { userValidation, userValidationPartial } from '../schemas/UserSchema.js'
 import { messageErrorZod } from "../utils/utils.js";
 import { querySql, queryTransactionSql } from '../database.js';
 export class User{
+
+    
+    static buildUserReturn(user){
+        return {
+            id: user.id,
+            name: user.name,
+            last_name: user.last_name,
+            age: user.age,
+            email: user.email,
+            username: user.username,
+            phone_number: user.phone_number,
+            rol: {id: user.rol_id, name: user.rol_name}
+        };
+    };
+
     static async validateUniqueFields(user){
         let { username, phone_number, email} =  user;
         let [rows] = await querySql(
@@ -17,9 +32,11 @@ export class User{
     }
 
     static async getUsers(){
-        let [rows] = await querySql(`SELECT id, name,
-                    last_name, age, email, username, phone_number FROM User`);
-        return rows;
+        let [rows] = await querySql(`SELECT u.id, u.name,
+                    u.last_name, u.age, u.email, u.username,
+                     u.phone_number, r.id as rol_id, r.name as rol_name FROM User u
+                     INNER JOIN Rol r ON u.rol_id = r.id`);
+        return rows.map(user=>this.buildUserReturn(user));
     }
 
 
@@ -27,22 +44,23 @@ export class User{
         if(!user) throw new Error('User data is required');
         const validationResult = await userValidation(user);
         if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
-        let { name, last_name, age, email, username, password, phone_number} = user;
+        let { name, last_name, age, email, username, password, phone_number, rol} = user;
         const validationFields = await this.validateUniqueFields(user);
         if(!validationFields.success) throw new Error(validationFields.message);
-        let [rows] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?)`
-            , [name, last_name, age, email, username, password, phone_number]);
+        let [rows] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?)`
+            , [name, last_name, age, email, username, password, phone_number, rol.id]);
         return rows[0][0].id;
     }
 
     static async deleteUserById({id=null}){
         if(!id) throw new Error('User id is required for delete');
-        let [rows] = await queryTransactionSql(`SELECT 
-            name FROM User
-            Where id = ? LIMIT 1`, [id]);
+        let [rows] = await queryTransactionSql(`SELECT u.name, u.last_name,
+            u.age, u.username, u.phone_number, r.id as rol_id,
+            r.name as rol_name FROM User u INNER JOIN Rol r ON
+             u.rol_id = r.id WHERE u.id = ? LIMIT 1`, [id]);
         if(rows.length === 0) throw new Error('User not found for deleted');
         await querySql(`DELETE FROM User WHERE id = ?`, [id]);
-        return rows[0];
+        return this.buildUserReturn(rows[0]);
     }
 
     static async updateUser({user=null, id=null}){
@@ -56,17 +74,21 @@ export class User{
         if(keys.length === 0) throw new Error('No fields found for update user');
         let [rows] = await querySql('SELECT name FROM User WHERE id = ? LIMIT 1', [id]);
         if(rows.length === 0) throw new Error('Not found User for update');
-        let {name, last_name, age, email, username, password, phone_number} = user;
+        let {name, last_name, age, email, username, password, phone_number, rol} = user;
+        if(rol) rol = rol.id;
          [rows] = await queryTransactionSql(`Call update_user(
-            ?, ? ,? ,? , ?, ?, ?, ?)`, [id , name, last_name, age, email, username,
-                password, phone_number]);
-        return rows[0];
+            ?, ? ,? ,? ,? , ?, ?, ?, ?)`, [id, name, last_name, age, email, username,
+                password, phone_number, rol]);
+        return this.buildUserReturn(rows[0][0]);
     }
 
     static async getUserById({id=null}){
         if(!id) throw new Error ("id params is required");
-        let [rows] = await querySql(`SELECT name FROM User WHERE id = ? LIMIT 1`, [id]);
+        let [rows] = await querySql(`SELECT u.name, u.last_name,
+            u.age, u.username, u.phone_number, r.id as rol_id,
+            r.name as rol_name FROM User u INNER JOIN Rol r ON
+             u.rol_id = r.id WHERE u.id = ? LIMIT 1`, [id]);
         if(rows.length === 0)throw new Error('User not found');
-        return rows[0];
+        return this.buildUserReturn(rows[0]);
     }
 }
