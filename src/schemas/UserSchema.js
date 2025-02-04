@@ -1,4 +1,5 @@
 import z from 'zod';
+import { AddressSchema } from './AddressSchema.js';
 const UserSchema = z.object({
     id: z.string().uuid().optional(),
     name: z.string({
@@ -38,9 +39,10 @@ const UserSchema = z.object({
         required_error: 'Rol ID is required',
         invalid_type_error: 'Rol ID must be a string'
     }).uuid({message: 'Rol ID must be a UUID string'})}, {
-        required_error: 'Rol is required',
-        invalid_type_error: 'Rol must be an object'
-    })
+        required_error: 'rol is required',
+        invalid_type_error: 'rol must be an object'
+    }),
+    address: AddressSchema
 })
 
 export const userValidation = async (user)=>{

@@ -58,10 +58,23 @@ INSERT INTO User (id, name, last_name, age, email, username, password, phone_num
     IN p_username VARCHAR(100),
     IN p_password VARCHAR(100),
     IN p_phone_number VARCHAR(100),
-    IN p_rol_id CHAR(36)
+    IN p_rol_id CHAR(36),
+    IN p_country VARCHAR(255),
+    IN p_province VARCHAR(255),
+    IN p_city VARCHAR(255),
+    IN p_house_number VARCHAR(100),
+    IN p_floor VARCHAR(100)
  )
  BEGIN
+    DECLARE last_id CHAR(36);
+
     INSERT INTO User (name, last_name, age, email, username, password, phone_number, rol_id)
     VALUES (p_name, p_last_name, p_age, p_email, p_username, p_password, p_phone_number, p_rol_id);
+
+    SET last_id = (SELECT id FROM User WHERE username = p_username LIMIT 1);
+
+    INSERT INTO Address (country, province, city, house_number, floor, user_id)VALUES
+    (p_country, p_province, p_city, p_house_number, p_floor, last_id);
+
     SELECT id FROM User WHERE username = p_username LIMIT 1;
  END;#
