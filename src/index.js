@@ -5,6 +5,7 @@ import { rolRoute } from './routes/rolRoute.js';
 import { cnn } from './database.js';
 import { addressRoute } from './routes/addressRoute.js';
 import { roomRoute } from './routes/roomRoute.js';
+import { reservationRoute } from './routes/reservationRoute.js';
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -15,6 +16,7 @@ app.use('/User', userRoute);
 app.use('/Rol', rolRoute);
 app.use('/Address', addressRoute);
 app.use('/Room', roomRoute);
+app.use('/Reservation', reservationRoute)
 
 app.use('*', (req, res)=>{
     res.setHeader('Content-Type', 'text/html ; charset=utf-8');

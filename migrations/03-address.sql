@@ -8,7 +8,7 @@ CREATE TABLE Address(
     house_number INT NOT NULL,
     floor INT NOT NULL,
     user_id CHAR(36) NOT NULL,
-    PRIMARY KEY (id),
+    PRIMARY KEY (id),   
     FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE ON UPDATE CASCADE
 );#
 

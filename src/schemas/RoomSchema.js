@@ -1,6 +1,6 @@
 import z from 'zod';
 
-const RoomSchema = z.object({
+export const RoomSchema = z.object({
     name: z.string({
         required_error: 'Room name is required',
         invalid_type_error: 'Room name must be a String'
@@ -23,6 +23,9 @@ const RoomSchema = z.object({
         required_error: 'Room state is required',
         invalid_type_error: 'Room state must be a string'
     })
+},{
+    required_error: 'room is required',
+    invalid_type_error: 'room must be a object'
 });
 
 export const roomValidate = async (room)=>{

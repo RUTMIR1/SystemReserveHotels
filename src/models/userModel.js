@@ -91,7 +91,7 @@ export class User{
         let [rows] = await querySql('SELECT name FROM User WHERE id = ? LIMIT 1', [id]);
         if(rows.length === 0) throw new Error('Not found User for update');
         let {name, last_name, age, email, username, password, phone_number, rol} = user;
-        if(rol) rol = rol.id;
+        if(rol) rol = rol.id; //whatttt
          [rows] = await queryTransactionSql(`Call update_user(
             ?, ? ,? ,? ,? , ?, ?, ?, ?)`, [id, name, last_name, age, email, username,
                 password, phone_number, rol]);
