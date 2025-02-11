@@ -81,8 +81,63 @@ BEGIN
             u.phone_number, rol.id as rol_id, rol.name as rol_name,
             a.id as address_id, a.country, a.province, a.city, a.house_number,
             a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
-            ro.image_url, ro.state as room_state FROM Reservation re INNER JOIN 
+            ro.image_url, ro.state as room_state, JSON_ARRAYAGG(JSON_OBJECT(
+            'id',c.id,'name',c.name)) AS room_categories FROM Reservation re INNER JOIN 
             User u ON re.user_id = u.id INNER JOIN Address a ON a.user_id = u.id
             INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
-            re.room_id = ro.id WHERE re.id = p_id;
+            re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
+            JOIN Category c ON rc.category_id = c.id WHERE re.id = p_id GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
+         re.check_out, re.code, re.amount, re.state, 
+         u.id, u.name, u.last_name, u.age, u.email, u.username, 
+         u.phone_number, rol.id, rol.name, 
+         a.id, a.country, a.province, a.city, a.house_number, a.floor, 
+         ro.id, ro.name, ro.price, ro.description, ro.image_url, ro.state;
+END;#
+
+DROP PROCEDURE IF EXISTS get_reservation;#
+
+CREATE PROCEDURE get_reservation(
+    IN p_id CHAR(36)
+)
+BEGIN
+    SELECT re.id, re.reservation_date_start,
+            re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
+            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
+            u.phone_number, rol.id as rol_id, rol.name as rol_name,
+            a.id as address_id, a.country, a.province, a.city, a.house_number,
+            a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
+            ro.image_url, ro.state as room_state, JSON_ARRAYAGG(JSON_OBJECT(
+            'id',c.id,'name',c.name)) AS room_categories FROM Reservation re INNER JOIN 
+            User u ON re.user_id = u.id INNER JOIN Address a ON a.user_id = u.id
+            INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
+            re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
+            JOIN Category c ON rc.category_id = c.id WHERE re.id = p_id GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
+         re.check_out, re.code, re.amount, re.state, 
+         u.id, u.name, u.last_name, u.age, u.email, u.username, 
+         u.phone_number, rol.id, rol.name, 
+         a.id, a.country, a.province, a.city, a.house_number, a.floor, 
+         ro.id, ro.name, ro.price, ro.description, ro.image_url, ro.state;
+END;#
+
+DROP PROCEDURE IF EXISTS get_all_reservations;#
+
+CREATE PROCEDURE get_all_reservations()
+BEGIN
+    SELECT re.id, re.reservation_date_start,
+            re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
+            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
+            u.phone_number, rol.id as rol_id, rol.name as rol_name,
+            a.id as address_id, a.country, a.province, a.city, a.house_number,
+            a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
+            ro.image_url, ro.state as room_state, JSON_ARRAYAGG(JSON_OBJECT(
+            'id',c.id,'name',c.name)) AS room_categories FROM Reservation re INNER JOIN 
+            User u ON re.user_id = u.id INNER JOIN Address a ON a.user_id = u.id
+            INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
+            re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
+            JOIN Category c ON rc.category_id = c.id GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
+         re.check_out, re.code, re.amount, re.state, 
+         u.id, u.name, u.last_name, u.age, u.email, u.username, 
+         u.phone_number, rol.id, rol.name, 
+         a.id, a.country, a.province, a.city, a.house_number, a.floor, 
+         ro.id, ro.name, ro.price, ro.description, ro.image_url, ro.state;
 END;#

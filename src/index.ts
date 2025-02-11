@@ -7,6 +7,7 @@ import { rolRoute } from './routes/rolRoute.js';
 import { addressRoute } from './routes/addressRoute.js';
 import { roomRoute } from './routes/roomRoute.js';
 import { reservationRoute } from './routes/reservationRoute.js';
+import { categoryRoute } from './routes/categoryRoute.js';
 
 
 const PORT:number = Number(process.env.PORT) || 3000;
@@ -19,7 +20,8 @@ app.use('/User', userRoute);
 app.use('/Rol', rolRoute);
 app.use('/Address', addressRoute);
 app.use('/Room', roomRoute);
-app.use('/Reservation', reservationRoute)
+app.use('/Reservation', reservationRoute);
+app.use('/Category', categoryRoute);
 
 app.use('*', (req:Request, res:Response):void=>{
     res.setHeader('Content-Type', 'text/html ; charset=utf-8');

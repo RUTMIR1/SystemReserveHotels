@@ -1,12 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES6",                   
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",             
-    "rootDir": "./src",                  
-    "outDir": "./dist",                  
-    "strict": true,                      
-    "esModuleInterop": true,             
-    "skipLibCheck": true                 
-  }
+    "target": "ESNext",
+    "module": "nodenext",
+    "moduleResolution":"nodenext",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+  },
+  "ts-node": {
+  "experimentalSpecifierResolution": "node",
+  "experimentalResolver": true,
+  "transpileOnly": false,
+  "esm": true,
+  "logError": true,
+}
 }

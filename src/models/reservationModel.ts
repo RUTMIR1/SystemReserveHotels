@@ -1,10 +1,10 @@
 import { querySql, queryTransactionSql } from "../database.js";
-import { ReservationType, reservationValidation, reservationValidationPartial } from "../schemas/reservationSchema.js";
 import { messageErrorZod } from "../utils/utils.js";
 import { ValidationUnique } from '../types/validationUnique.js'
 import { RowDataPacket } from 'mysql2';
 import { ReservationDto } from "../dtos/ReservationDto.js";
 import { SafeParseReturnType } from "zod";
+import { ReservationType, reservationValidation, reservationValidationPartial } from "../schemas/reservationSchema.js";
 
 export class Reservation{
 
@@ -19,18 +19,22 @@ export class Reservation{
         }
         return {success: true, message: 'Reservation fields correct'};
     }
+
+    static async validateExisting(reservation:ReservationType | Partial<ReservationType>):Promise<ValidationUnique>{
+        if(reservation.user && reservation.room){
+            let [UserRow]:RowDataPacket[] = await querySql(`SELECT id FROM User
+                 WHERE id = ? LIMIT 1`, [reservation.user.id]);
+            let [RoomRow]:RowDataPacket[] = await querySql(`SELECT id FROM Room 
+                WHERE id = ? LIMIT 1`, [reservation.room.id]);
+            if(UserRow.length === 0) return {success:false, message:'user does not exits'};  
+            if(RoomRow.length === 0) return {success:false, message:'room does not exits'};
+        }
+        return {success:true, message:`Valids fields`};
+    }
+
     static async getReservations():Promise<ReservationDto[]>{
-        const [rows] = await querySql(`SELECT re.id, re.reservation_date_start,
-            re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
-            u.phone_number, rol.id as rol_id, rol.name as rol_name,
-            a.id as address_id, a.country, a.province, a.city, a.house_number,
-            a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
-            ro.image_url, ro.state as room_state FROM Reservation re INNER JOIN 
-            User u ON re.user_id = u.id INNER JOIN Address a ON a.user_id = u.id
-            INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
-            re.room_id = ro.id`);
-        return rows.map((re:any)=>new ReservationDto(re));
+        const [rows] = await querySql(`CALL get_all_reservations()`);
+        return rows[0].map((re:any)=>new ReservationDto(re));
     }
 
     static async createReservation(reservation:ReservationType | null=null):Promise<string>{
@@ -39,6 +43,8 @@ export class Reservation{
         if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
         const uniqueFieldsResult:ValidationUnique = await this.validateUniqueFields(reservation);
         if(!uniqueFieldsResult.success) throw new Error(uniqueFieldsResult.message);
+        const validationExisting:ValidationUnique = await this.validateExisting(reservation);
+        if(!validationExisting.success) throw new Error(validationExisting.message);
         const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_reservation(?, ?, ?, ?, ?,
             ?, ?, ?, ?)`, [reservation.reservation_date_start, reservation.reservation_date_end,
                  reservation.check_in, reservation.check_out, 
@@ -59,6 +65,8 @@ export class Reservation{
         if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
         const validateUniqueFields:ValidationUnique = await this.validateUniqueFields(reservation);
         if(!validateUniqueFields.success) throw new Error(validateUniqueFields.message);
+        const validationExisting:ValidationUnique = await this.validateExisting(reservation);
+        if(!validationExisting.success) throw new Error(validationExisting.message);
         let userId:string|null=null, roomId:string|null=null;
         if(reservation.user) userId = reservation.user.id;
         if(reservation.room) roomId = reservation.room.id;
@@ -71,35 +79,17 @@ export class Reservation{
 
     static async deleteReservation(id:string | null=null):Promise<ReservationDto>{
         if(!id) throw new Error('Reservation id is required');
-        const [rows]:RowDataPacket[] = await querySql(`SELECT re.id, re.reservation_date_start,
-            re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
-            u.phone_number, rol.id as rol_id, rol.name as rol_name,
-            a.id as address_id, a.country, a.province, a.city, a.house_number,
-            a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
-            ro.image_url, ro.state as room_state FROM Reservation re INNER JOIN 
-            User u ON re.user_id = u.id INNER JOIN Address a ON a.user_id = u.id
-            INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
-            re.room_id = ro.id WHERE re.id = ?`, [id]);
-        if(rows.length === 0) throw new Error('Reservation not found for delete');
+        const [rows]:RowDataPacket[] = await querySql(`CALL get_reservation(?)`, [id]);
+        if(rows[0].length === 0) throw new Error('Reservation not found for delete');
         await queryTransactionSql(`DELETE FROM Reservation WHERE id = ?`, [id]);
         return new ReservationDto(rows[0]);
     }
 
     static async getReservationById(id:string | null=null):Promise<ReservationDto>{
         if(!id) throw new Error('Reservation id is required');
-        const [rows]:RowDataPacket[] = await querySql(`SELECT re.id, re.reservation_date_start,
-            re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
-            u.phone_number, rol.id as rol_id, rol.name as rol_name,
-            a.id as address_id, a.country, a.province, a.city, a.house_number,
-            a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
-            ro.image_url, ro.state as room_state FROM Reservation re INNER JOIN 
-            User u ON re.user_id = u.id INNER JOIN Address a ON a.user_id = u.id
-            INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
-            re.room_id = ro.id WHERE re.id = ?`, [id]);
+        const [rows]:RowDataPacket[] = await querySql(`CALL get_reservation(?)`, [id]);
         if(rows.length === 0) throw new Error('Reservation not found');
-        return new ReservationDto(rows[0]);
+        return new ReservationDto(rows[0][0]);
     }
 }
 

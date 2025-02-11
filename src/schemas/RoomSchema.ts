@@ -22,7 +22,19 @@ export const RoomSchema = z.object({
     state: z.enum(['active', 'inactive', 'reserved'], {
         required_error: 'Room state is required',
         invalid_type_error: 'Room state must be a string'
-    })
+    }),
+    categories: z.array(z.object({
+        id: z.string({
+            required_error: "Room category id is required",
+            invalid_type_error: "Room category id must be a string"
+        })
+    },{
+        required_error: "Room category is required",
+        invalid_type_error: "Room category must be a object"
+    }),{
+        required_error:"Room categories is required",
+        invalid_type_error: "Room categories must be a array"
+    }).min(1,{message: "at least one category is required"})
 },{
     required_error: 'room is required',
     invalid_type_error: 'room must be a object'

@@ -21,6 +21,15 @@ export class User{
         return {success: true, message: 'User fields correct'};
     }
 
+    static async validateExisting(user:UserType | Partial<UserType>):Promise<ValidationUnique>{
+            if(user.rol){
+                let [RolRow]:RowDataPacket[] = await querySql(`SELECT id FROM Rol
+                     WHERE id = ? LIMIT 1`, [user.rol.id]);
+                if(RolRow.length === 0) return {success:false, message:'rol does not exist'};  
+            }
+            return {success:true, message:`Valids fields`};
+    }
+
     static async getUsers():Promise<UserDto[]>{
         let [rows]:RowDataPacket[] = await querySql(`SELECT u.id, u.name, 
             u.last_name, u.age, u.email, u.username,
@@ -38,6 +47,8 @@ export class User{
         if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
         const validationFields:ValidationUnique = await this.validateUniqueFields(user);
         if(!validationFields.success) throw new Error(validationFields.message);
+        const validationExisting:ValidationUnique = await this.validateExisting(user);
+        if(!validationExisting.success) throw new Error(validationExisting.message);
         let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             , [user.name, user.last_name, user.age, user.email, user.username,
                  user.password, user.phone_number, user.rol.id
@@ -57,8 +68,8 @@ export class User{
              INNER JOIN Address a ON u.id = a.user_id WHERE u.id = ? LIMIT 1`, [id]);
         if(rows.length === 0) throw new Error('User not found for deleted');
         let [result]:RowDataPacket[] = await querySql(`SELECT r.id FROM Reservation r INNER JOIN User u ON
-             r.user_id = u.id LIMIT 1`);
-        if(result.length !== 0) throw new Error(`User to delete must not have any reservation`);
+             r.user_id = u.id WHERE u.id = ? LIMIT 1`, [id]);
+    if(result.length !== 0) throw new Error(`User to delete must not have any reservation`);
         await querySql(`DELETE FROM User WHERE id = ?`, [id]);
         return new UserDto(rows[0]);
     }
@@ -70,6 +81,8 @@ export class User{
         if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
         const validationFields:ValidationUnique = await this.validateUniqueFields(user);
         if(!validationFields.success) throw new Error(validationFields.message);
+        const validationExisting:ValidationUnique = await this.validateExisting(user);
+        if(!validationExisting.success) throw new Error(validationExisting.message);
         const keys: string[] = Object.keys(user);
         if(keys.length === 0) throw new Error('No fields found for update user');
         let [rows]:RowDataPacket[] = await querySql('SELECT name FROM User WHERE id = ? LIMIT 1', [id]);

@@ -49,7 +49,7 @@ export class Rol{
         let [rows]:RowDataPacket[] = await querySql(`SELECT id, name FROM Rol WHERE id = ?`, [id]);
         if(rows.length === 0) throw new Error('Rol not found for deleted');
         let [result]:RowDataPacket[] = await querySql(`SELECT r.id FROM Rol r INNER JOIN User u ON
-             r.id = u.rol_id LIMIT 1`);
+             r.id = u.rol_id WHERE r.id = ? LIMIT 1`, [id]);
         if(result.length !== 0) throw new Error('Rol to delete must not have any User');
         await queryTransactionSql(`DELETE FROM Rol WHERE id = ?`, [id]);
         return new RolDto(rows[0]);
