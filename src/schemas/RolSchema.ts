@@ -8,10 +8,12 @@ const RolSchema = z.object({
     })
 });
 
-export const rolValidation = async (rol)=>{
+export type RolType = z.infer<typeof RolSchema>;
+
+export const rolValidation = async (rol:unknown):Promise<z.SafeParseReturnType<RolType,RolType>>=>{
     return RolSchema.safeParse(rol);
 }
 
-export const rolValidationPartial = async (rol)=>{
+export const rolValidationPartial = async (rol:unknown):Promise<z.SafeParseReturnType<Partial<RolType>,Partial<RolType>>>=>{
     return RolSchema.partial().safeParse(rol);
 }

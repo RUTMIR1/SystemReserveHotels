@@ -11,7 +11,7 @@ password VARCHAR(100) NOT NULL,
 phone_number VARCHAR(100) NOT NULL UNIQUE,
 rol_id CHAR(36) NOT NULL,
 PRIMARY KEY (id),
-FOREIGN KEY (rol_id) REFERENCES Rol(id) ON DELETE CASCADE ON UPDATE CASCADE
+FOREIGN KEY (rol_id) REFERENCES Rol(id)
 );#
 
 INSERT INTO User (id, name, last_name, age, email, username, password, phone_number, rol_id) values
@@ -44,8 +44,10 @@ INSERT INTO User (id, name, last_name, age, email, username, password, phone_num
     rol_id = COALESCE(p_rol_id, rol_id)
     WHERE id = p_id;
     SELECT u.id, u.name, u.last_name, u.age, u.email, u.username, u.phone_number,
-    r.id as rol_id, r.name as rol_name FROM User u 
-    INNER JOIN Rol r ON u.rol_id = r.id WHERE u.id = p_id LIMIT 1;
+    r.id as rol_id, r.name as rol_name, a.id as address_id, a.country, a.province,
+     a.city, a.house_number, a.floor FROM User u 
+    INNER JOIN Rol r ON u.rol_id = r.id INNER JOIN Address a ON u.id = a.user_id
+     WHERE u.id = p_id LIMIT 1;
  END;#
 
  DROP PROCEDURE IF EXISTS insert_user;#

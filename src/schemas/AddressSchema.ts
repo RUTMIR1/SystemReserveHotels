@@ -31,6 +31,8 @@ export const AddressSchema = z.object({
     invalid_type_error: 'address must be an object'
 });
 
-export const addressValidationPartial = async(address)=>{
+export type AddressType = z.infer<typeof AddressSchema>;
+
+export const addressValidationPartial = async(address:unknown):Promise<z.SafeParseReturnType<Partial<AddressType>, Partial<AddressType>>>=>{
     return AddressSchema.partial().safeParse(address);
 }

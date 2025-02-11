@@ -32,5 +32,5 @@ CREATE PROCEDURE update_rol(
 )
 BEGIN
     UPDATE Rol SET name = COALESCE(p_name, name) WHERE id = p_id;
-    SELECT name FROM Rol WHERE id = p_id LIMIT 1;
+    SELECT id, name FROM Rol WHERE id = p_id LIMIT 1;
 END;#

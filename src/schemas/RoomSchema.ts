@@ -28,10 +28,12 @@ export const RoomSchema = z.object({
     invalid_type_error: 'room must be a object'
 });
 
-export const roomValidate = async (room)=>{
+export type RoomType = z.infer<typeof RoomSchema>;
+
+export const roomValidate = async (room:unknown):Promise<z.SafeParseReturnType<RoomType, RoomType>>=>{
     return RoomSchema.safeParse(room);
 }
 
-export const roomPartialValidate = async (room)=>{
+export const roomPartialValidate = async (room:unknown):Promise<z.SafeParseReturnType<Partial<RoomType>, Partial<RoomType>>>=>{
     return RoomSchema.partial().safeParse(room);
 }

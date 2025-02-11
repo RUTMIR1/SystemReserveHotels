@@ -54,5 +54,5 @@ BEGIN
     state = COALESCE(p_state, state)
     WHERE id = p_id;
 
-    SELECT name, price, description, image_url, state FROM Room WHERE id = p_id;
+    SELECT id, name, price, description, image_url, state FROM Room WHERE id = p_id;
 END;#

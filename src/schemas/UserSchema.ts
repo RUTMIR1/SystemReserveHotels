@@ -27,8 +27,6 @@ export const UserSchema = z.object({
     password: z.string({
         required_error: 'User password is required',
         invalid_type_error: 'User password must be a string',
-        min_length: 8,
-        max_length: 20,
         message: 'User password must be between 8 and 20 characters long',
     }),
     phone_number: z.string({
@@ -46,12 +44,14 @@ export const UserSchema = z.object({
 },{
     required_error: 'user is required',
     invalid_type_error: 'user must be an object'
-})
+});
 
-export const userValidation = async (user)=>{
+export type UserType = z.infer<typeof UserSchema>;
+
+export const userValidation = async (user:unknown):Promise<z.SafeParseReturnType<UserType,UserType>> => {
     return UserSchema.safeParse(user);
 }
 
-export const userValidationPartial = async (user)=>{
+export const userValidationPartial = async (user: unknown):Promise<z.SafeParseReturnType<Partial<UserType>,Partial<UserType>>> => {
     return UserSchema.partial().safeParse(user);
 }
