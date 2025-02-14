@@ -27,7 +27,6 @@ export const UserSchema = z.object({
     password: z.string({
         required_error: 'User password is required',
         invalid_type_error: 'User password must be a string',
-        message: 'User password must be between 8 and 20 characters long',
     }),
     phone_number: z.string({
         required_error: 'User phone number is required',

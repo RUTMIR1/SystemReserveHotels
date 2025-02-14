@@ -11,11 +11,6 @@ CREATE TABLE Address(
     PRIMARY KEY (id),   
     FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE ON UPDATE CASCADE
 );#
-
-INSERT INTO Address (country, province, city, house_number, floor, user_id) VALUES
-    ('USA', 'New York', 'Manhattan', 123, 1, '431c358a-e1f4-11ef-8f63-0242ac130002'),
-    ('Canada', 'Ontario', 'Toronto', 456, 2, '431d6c93-e1f4-11ef-8f63-0242ac130002');#
-
 DROP PROCEDURE IF EXISTS update_address;#
 
 CREATE PROCEDURE update_address(

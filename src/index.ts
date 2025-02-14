@@ -1,6 +1,6 @@
 import express, {Request, Response} from 'express';
 import { PoolConnection } from 'mysql2/promise';
-import { migrationDatabase } from './utils/utils.js';
+import { insertUsers, migrationDatabase } from './utils/utils.js';
 import { cnn } from './database.js';
 import { userRoute } from './routes/userRoute.js';
 import { rolRoute } from './routes/rolRoute.js';
@@ -11,12 +11,14 @@ import { categoryRoute } from './routes/categoryRoute.js';
 import cookieParser from 'cookie-parser';
 import { accessCookie } from './middlewares/accessCookie.js';
 import { authRoute } from './routes/authRoute.js';
+import { corsMiddleware } from './middlewares/cors.js';
 
 
 const PORT:number = Number(process.env.PORT) || 3000;
 const app:express.Express = express();
 
 
+app.use(corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -42,6 +44,7 @@ app.listen(PORT, async ():Promise<void>=>{
     try{
         connection = await cnn.getConnection();
         await migrationDatabase('migrations/', connection);
+        await insertUsers(connection);
     }catch(err:any){
         console.error('Error executing migrations:', err.message);
     }finally{

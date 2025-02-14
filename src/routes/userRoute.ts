@@ -5,6 +5,6 @@ export const userRoute:Router = express.Router();
 
 userRoute.get('/', authVerification(['administrator', 'owner']), UserController.getUsers);
 userRoute.get('/:id', authVerification(['administrator', 'owner']), UserController.getUserById);
-userRoute.post('/', authVerification(['administrator','owner']),UserController.createUser);
+userRoute.post('/', UserController.createUser);
 userRoute.delete('/:id', authVerification(['administrator', 'owner']), UserController.deleteUserById);
 userRoute.patch('/:id', authVerification(['administrator', 'owner']), UserController.updateUser); 

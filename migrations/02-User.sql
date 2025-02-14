@@ -14,11 +14,6 @@ PRIMARY KEY (id),
 FOREIGN KEY (rol_id) REFERENCES Rol(id)
 );#
 
-INSERT INTO User (id, name, last_name, age, email, username, password, phone_number, rol_id) values
- ('431c358a-e1f4-11ef-8f63-0242ac130002' ,'John', 'Doe', 30, 'Jhon@gmail.com', 'john_doe', 'password123', '1234567','6939d182-e1e7-11ef-8f63-0242ac130002');#
-INSERT INTO User (id, name, last_name, age, email, username, password, phone_number, rol_id) values
- ('431d6c93-e1f4-11ef-8f63-0242ac130002', 'Marco', 'Hans', 25, 'Marco@gmail.com', 'Mark123', '12345', '111333454', '693b0754-e1e7-11ef-8f63-0242ac130002');#
-
  DROP PROCEDURE IF EXISTS update_user;#
 
  CREATE PROCEDURE update_user(

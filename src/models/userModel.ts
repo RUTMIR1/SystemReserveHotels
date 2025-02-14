@@ -5,6 +5,7 @@ import { UserDto } from '../dtos/userDto.js';
 import { RowDataPacket } from 'mysql2';
 import { ValidationUnique } from '../types/validationUnique.js'
 import { SafeParseReturnType } from 'zod';
+import bcrypt from 'bcrypt';
 
 export class User{
     static async validateUniqueFields(user:UserType | Partial<UserType>):Promise<ValidationUnique>{
@@ -49,9 +50,10 @@ export class User{
         if(!validationFields.success) throw new Error(validationFields.message);
         const validationExisting:ValidationUnique = await this.validateExisting(user);
         if(!validationExisting.success) throw new Error(validationExisting.message);
+        let hashedPassword:string = await bcrypt.hash(user.password, 10);
         let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             , [user.name, user.last_name, user.age, user.email, user.username,
-                 user.password, user.phone_number, user.rol.id
+                 hashedPassword, user.phone_number, user.rol.id
                 ,user.address.country, user.address.province, user.address.city,
                  user.address.house_number,
                 user.address.floor]);
