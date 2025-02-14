@@ -8,8 +8,11 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,
   },
+  "include": [
+    "src",
+    "src/types/express/index.d.ts"
+  ],
   "ts-node": {
   "experimentalSpecifierResolution": "node",
   "experimentalResolver": true,

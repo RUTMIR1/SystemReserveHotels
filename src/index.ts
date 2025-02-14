@@ -8,6 +8,9 @@ import { addressRoute } from './routes/addressRoute.js';
 import { roomRoute } from './routes/roomRoute.js';
 import { reservationRoute } from './routes/reservationRoute.js';
 import { categoryRoute } from './routes/categoryRoute.js';
+import cookieParser from 'cookie-parser';
+import { accessCookie } from './middlewares/accessCookie.js';
+import { authRoute } from './routes/authRoute.js';
 
 
 const PORT:number = Number(process.env.PORT) || 3000;
@@ -15,7 +18,11 @@ const app:express.Express = express();
 
 
 app.use(express.json());
+app.use(cookieParser());
 
+app.use('*', accessCookie);
+
+app.use('/auth', authRoute);
 app.use('/User', userRoute);
 app.use('/Rol', rolRoute);
 app.use('/Address', addressRoute);

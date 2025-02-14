@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --ext ts --exec \"node --loader ts-node/esm src/index.ts\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -19,14 +20,19 @@
   },
   "homepage": "https://github.com/RUTMIR1/SystemReserveHotels#readme",
   "devDependencies": {
-    "@types/express": "^5.0.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^22.13.1",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@types/express": "^5.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.12.0",
     "zod": "^3.24.1"
   }

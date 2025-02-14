@@ -4,7 +4,7 @@ import { ValidationUnique } from '../types/validationUnique.js'
 import { RowDataPacket } from 'mysql2';
 import { ReservationDto } from "../dtos/ReservationDto.js";
 import { SafeParseReturnType } from "zod";
-import { ReservationType, reservationValidation, reservationValidationPartial } from "../schemas/reservationSchema.js";
+import { ReservationType, reservationValidation, reservationValidationPartial } from "../schemas/ReservationSchema.js";
 
 export class Reservation{
 
