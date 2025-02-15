@@ -6,7 +6,9 @@ import { RowDataPacket } from 'mysql2';
 import { ValidationUnique } from '../types/validationUnique.js'
 import { SafeParseReturnType } from 'zod';
 import bcrypt from 'bcrypt';
-
+import { NotFoundException } from '../errors/notFoundError.js';
+import { MissingParameterException } from '../errors/missingParameterError.js';
+import { ValidationException } from '../errors/validationError.js'
 export class User{
     static async validateUniqueFields(user:UserType | Partial<UserType>):Promise<ValidationUnique>{
         let { username ,phone_number, email} =  user;
@@ -45,11 +47,11 @@ export class User{
     static async createUser(user:UserType | null = null):Promise<string>{
         if(!user) throw new Error('User data is required');
         const validationResult:SafeParseReturnType<UserType, UserType> = await userValidation(user);
-        if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
+        if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult));
         const validationFields:ValidationUnique = await this.validateUniqueFields(user);
-        if(!validationFields.success) throw new Error(validationFields.message);
+        if(!validationFields.success) throw new ValidationException(validationFields.message);
         const validationExisting:ValidationUnique = await this.validateExisting(user);
-        if(!validationExisting.success) throw new Error(validationExisting.message);
+        if(!validationExisting.success) throw new ValidationException(validationExisting.message);
         let hashedPassword:string = await bcrypt.hash(user.password, 10);
         let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             , [user.name, user.last_name, user.age, user.email, user.username,
@@ -61,34 +63,34 @@ export class User{
     }
 
     static async deleteUserById(id:string | null=null):Promise<UserDto>{
-        if(!id) throw new Error('User id is required for delete');
+        if(!id) throw new MissingParameterException('User id is required for delete');
         let [rows]:RowDataPacket[] = await queryTransactionSql(`SELECT u.id, u.name, u.last_name,
             u.age, u.username, u.phone_number, r.id as rol_id,
             r.name as rol_name, a.id as address_id, a.country, a.province,
              a.city, a.house_number, a.floor
              FROM User u INNER JOIN Rol r ON u.rol_id = r.id
              INNER JOIN Address a ON u.id = a.user_id WHERE u.id = ? LIMIT 1`, [id]);
-        if(rows.length === 0) throw new Error('User not found for deleted');
+        if(rows.length === 0) throw new NotFoundException('User not found for delete');
         let [result]:RowDataPacket[] = await querySql(`SELECT r.id FROM Reservation r INNER JOIN User u ON
              r.user_id = u.id WHERE u.id = ? LIMIT 1`, [id]);
-    if(result.length !== 0) throw new Error(`User to delete must not have any reservation`);
+    if(result.length !== 0) throw new ValidationException(`User to delete must not have any reservation`);
         await querySql(`DELETE FROM User WHERE id = ?`, [id]);
         return new UserDto(rows[0]);
     }
 
     static async updateUser(user:Partial<UserType> | null=null, id:string | null=null):Promise<UserDto>{
-        if(!id) throw new Error('User id is required for update');
-        if(!user) throw new Error('User data is required for update');
-        const validationResult:SafeParseReturnType<Partial<UserType>,Partial<UserType>> = await userValidationPartial(user);
-        if(!validationResult.success) throw new Error(messageErrorZod(validationResult));
-        const validationFields:ValidationUnique = await this.validateUniqueFields(user);
-        if(!validationFields.success) throw new Error(validationFields.message);
-        const validationExisting:ValidationUnique = await this.validateExisting(user);
-        if(!validationExisting.success) throw new Error(validationExisting.message);
+        if(!id) throw new MissingParameterException('User id is required for update');
+        if(!user) throw new MissingParameterException('User data is required for update');
         const keys: string[] = Object.keys(user);
-        if(keys.length === 0) throw new Error('No fields found for update user');
+        if(keys.length === 0) throw new MissingParameterException('No fields found for update user');
+        const validationResult:SafeParseReturnType<Partial<UserType>,Partial<UserType>> = await userValidationPartial(user);
+        if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult));
+        const validationFields:ValidationUnique = await this.validateUniqueFields(user);
+        if(!validationFields.success) throw new ValidationException(validationFields.message);
+        const validationExisting:ValidationUnique = await this.validateExisting(user);
+        if(!validationExisting.success) throw new ValidationException(validationExisting.message);
         let [rows]:RowDataPacket[] = await querySql('SELECT name FROM User WHERE id = ? LIMIT 1', [id]);
-        if(rows.length === 0) throw new Error('Not found User for update');
+        if(rows.length === 0) throw new NotFoundException('Not found User for update');
         let rolId:string | null = null;
         if(user.rol) rolId = user.rol.id;
         let [result] = await queryTransactionSql(`Call update_user(
@@ -99,14 +101,14 @@ export class User{
     }
 
     static async getUserById(id:string | null=null):Promise<UserDto> {
-        if(!id) throw new Error ("id params is required");
+        if(!id) throw new MissingParameterException("id params is required");
         let [rows]:RowDataPacket[] = await querySql(`SELECT u.id, u.name, u.last_name,
             u.age, u.username, u.phone_number, r.id as rol_id,
             r.name as rol_name, a.id as address_id, a.country, a.province,
              a.city, a.house_number, a.floor
              FROM User u INNER JOIN Rol r ON u.rol_id = r.id
              INNER JOIN Address a ON u.id = a.user_id WHERE u.id = ? LIMIT 1`, [id]);
-        if(rows.length === 0)throw new Error('User not found');
+        if(rows.length === 0)throw new NotFoundException('User not found');
         return new UserDto(rows[0]);
     }
 }   

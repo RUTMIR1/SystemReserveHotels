@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { SessionData } from "../types/requestSession.js";
 import bcrypt from 'bcrypt';
+import { ValidationException } from "../errors/validationError.js";
+import { NotFoundException } from "../errors/notFoundError.js";
+import { AuthException } from "../errors/authError.js";
 
 dotenv.config();
 
@@ -15,12 +18,12 @@ export class authService{
 
     static async loginUser(dataAuth:AuthType){
         const resultValidation = await authValidation(dataAuth);
-        if(!resultValidation.success) throw new Error(messageErrorZod(resultValidation));
+        if(!resultValidation.success) throw new ValidationException(messageErrorZod(resultValidation));
         const [rows]:RowDataPacket[] = await querySql(`SELECT u.username, u.password, r.name FROM User u
              INNER JOIN Rol r ON u.rol_id = r.id WHERE username = ?`, [dataAuth.username]);
-        if(rows.length === 0) throw new Error('User not exist');
+        if(rows.length === 0) throw new NotFoundException('User not exist');
         const resultCompare:boolean = await bcrypt.compare(dataAuth.password, rows[0].password);
-        if(!resultCompare) throw new Error('password incorrect');
+        if(!resultCompare) throw new AuthException('password incorrect');
         const newDataAuth:SessionData = {username: rows[0].username, rol:rows[0].name};
         const token = jwt.sign(newDataAuth, JWT_SECRET, { 
             expiresIn: '1h'

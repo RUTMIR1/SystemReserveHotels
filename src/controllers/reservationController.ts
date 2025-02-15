@@ -9,7 +9,8 @@ export class ReservationController{
             let reservations:ReservationDto[] = await Reservation.getReservations();
             res.status(200).json(reservations);
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
     
@@ -19,7 +20,8 @@ export class ReservationController{
             res.status(201).json({status: 201, message: 'Reservation created successfully!',
                 reservation: reservationId});
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -29,7 +31,8 @@ export class ReservationController{
             res.status(200).json({status: 200, message: `Reservation updated successfully`,
                 reservation: reservationUpdate});
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -39,7 +42,8 @@ export class ReservationController{
             res.status(200).json({status: 200, message: 'Reservation deleted successfully',
                 reservation: reservationDeleted});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
     
@@ -48,7 +52,8 @@ export class ReservationController{
             let reservation:ReservationDto = await Reservation.getReservationById(req.params.id);
             res.status(200).json(reservation);
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 }

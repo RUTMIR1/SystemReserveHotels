@@ -19,8 +19,11 @@ export const accessCookie = async (req:Request, res:Response, next:NextFunction)
 export const authVerification = (allowed:string[]=[])=>{
     return async (req:Request, res:Response, next:NextFunction):Promise<void>=>{
         if(allowed.length === 0) return next();
-        console.log(req.payload);
         if(allowed.includes(req.payload.rol)) return next();
-        res.status(403).json({status:403, message: 'Unauthorized access'});
+        if(req.payload.rol === ''){
+            res.status(401).json({status:403, message: 'Unauthorized access'});
+        }else{
+            res.status(403).json({status:403, message: 'No Permission to use'});
+        }
     }
 }

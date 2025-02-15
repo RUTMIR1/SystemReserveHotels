@@ -7,7 +7,8 @@ export class CategoryController{
             let categories:CategoryDto[] = await Category.getCategories();
             res.status(200).json(categories);
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -18,7 +19,8 @@ export class CategoryController{
                 category: categoryId
             });
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -28,7 +30,8 @@ export class CategoryController{
             res.status(200).json({status:200, message: 'user update succesfully',
                 category: categoryUpdate});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -38,7 +41,8 @@ export class CategoryController{
             res.status(200).json({status:200, message: 'Category delete successfully',
                  category: categoryDeleted});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message})
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -47,7 +51,8 @@ export class CategoryController{
             let category = await Category.getCategory(req.params.id);
             res.status(200).json(category);
         }catch(err:any){
-            res.status(403).json({status:200, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 }

@@ -8,7 +8,8 @@ export class RoomController{
             let rooms:RoomDto[] = await Room.getRooms();
             res.status(200).json(rooms);
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -18,7 +19,8 @@ export class RoomController{
             res.status(201).json({status:201, message: 'Room created successfully',
                 room: roomId});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -28,7 +30,8 @@ export class RoomController{
             res.status(200).json({status:200, message: `Room updated successfully`,
                 room: roomUpdate});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -38,7 +41,8 @@ export class RoomController{
             res.status(200).json({status: 200, message: `Room deleted successfully`,
                 room: roomDeleted});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -47,7 +51,8 @@ export class RoomController{
             let room:RoomDto = await Room.getRoomById(req.params.id);
             res.status(200).json(room);
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
     

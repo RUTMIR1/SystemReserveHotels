@@ -12,7 +12,8 @@ export class authController{
                 maxAge: 1000 * 60* 60
             }).send({message: "Session sucessfully", token})
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 
@@ -20,7 +21,8 @@ export class authController{
         try{
             res.clearCookie('access-token').json({status:200, message:'logout successfully'});
         }catch(err:any){
-            res.status(403).json({status:403, message:`${err.message}`});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 }

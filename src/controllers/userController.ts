@@ -8,7 +8,8 @@ export class UserController{
             res.status(201).json({status: 201, message: 'User created sucessfully!', 
                 user: newUserId});
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
 
@@ -17,7 +18,8 @@ export class UserController{
             let users:UserDto[]= await User.getUsers();
             res.status(200).json(users);
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }    
     };
     static async deleteUserById(req:Request, res:Response):Promise<void>{
@@ -26,7 +28,8 @@ export class UserController{
             res.status(200).json({status: 200, message: 'User deleted successfully',
                 user: userDeleted});
         }catch(err:any){
-            res.status(403).json({status: 403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
 
@@ -36,7 +39,8 @@ export class UserController{
             res.status(200).json({status: 200, message: 'User updated successfully',
                 user: result});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
     static async getUserById(req:Request, res:Response):Promise<void>{
@@ -44,7 +48,8 @@ export class UserController{
             let user:UserDto = await User.getUserById(req.params.id);
             res.status(200).json(user);
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     }
 }

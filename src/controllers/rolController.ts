@@ -7,7 +7,8 @@ export class RolController{
             let rols:RolDto[] = await Rol.getRols();
             res.status(200).json(rols);
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
     
@@ -17,7 +18,8 @@ export class RolController{
             res.status(201).json({status:201, message: `User created successfully`,
                 rol: rolId});
         }catch(err:any){
-            res.status(403).json({status:403, message: err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
     
@@ -27,7 +29,8 @@ export class RolController{
             res.status(200).json({status:200, message: `User updated successfully`,
                 rol: rolUpdate});
         }catch(err:any){
-            res.status(403).json({status:403, message:err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
 
@@ -37,7 +40,8 @@ export class RolController{
             res.status(200).json({status:200, message: 'Rol deleted successfully',
                 rol: rolDelete});
         }catch(err:any){
-            res.status(403).json({status:403, message:err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
     
@@ -46,7 +50,8 @@ export class RolController{
             let rol:RolDto = await Rol.getRolById(req.params.id);
             res.status(200).json(rol);
         }catch(err:any){
-            res.status(403).json({status:403, message:err.message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
         }
     };
 }
