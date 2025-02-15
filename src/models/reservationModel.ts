@@ -94,4 +94,12 @@ export class Reservation{
         if(rows.length === 0) throw new NotFoundException('Reservation not found');
         return new ReservationDto(rows[0][0]);
     }
+
+    static async getReservationsByUsername(username:string | null=null):Promise<ReservationDto[]>{
+        if(!username) throw new MissingParameterException('User username is required');
+        const [rows]:RowDataPacket[] = await querySql(`SELECT username FROM User WHERE username = ?`, [username]);
+        if(rows.length === 0) throw new NotFoundException('User not found');
+        const [result]:RowDataPacket[] = await querySql(`CALL get_reservations_by_username(?)`, [username]);
+        return result[0].map((re:any)=> new ReservationDto(re));
+    }
 }

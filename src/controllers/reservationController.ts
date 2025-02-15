@@ -56,6 +56,27 @@ export class ReservationController{
             res.status(status).json({status, message});
         }
     }
+
+    static async getReservationsByUsername(req:Request, res:Response):Promise<void>{
+        try{
+            let reservations:ReservationDto[] = await Reservation.getReservationsByUsername(req.params.username);
+            res.status(200).json(reservations);
+        }catch(err:any){
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
+        }
+    }
+
+    static async getMyReservations(req:Request, res:Response):Promise<void>{
+        try{
+            console.log(req.payload.username);
+            let reservations:ReservationDto[] = await Reservation.getReservationsByUsername(req.payload.username);
+            res.status(200).json(reservations);
+        }catch(err:any){
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
+        }
+    }
 }
 
 

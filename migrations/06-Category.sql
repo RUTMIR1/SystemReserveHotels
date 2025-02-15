@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS Category;#
 
 CREATE TABLE Category(
     id CHAR(36) NOT NULL DEFAULT (UUID()),
-    name VARCHAR(100),
+    name VARCHAR(100) UNIQUE,
     PRIMARY KEY(id)
 );#
 

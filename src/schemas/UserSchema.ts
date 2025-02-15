@@ -1,6 +1,6 @@
 import z from 'zod';
 import { AddressSchema } from './AddressSchema.js';
-export const UserSchema = z.object({
+const UserSchemaBase = z.object({
     id: z.string().uuid().optional(),
     name: z.string({
         required_error: 'User name is required',
@@ -32,18 +32,21 @@ export const UserSchema = z.object({
         required_error: 'User phone number is required',
         invalid_type_error: 'User phone number must be a string'
     }),
-    rol: z.object({id: z.string({
-        required_error: 'Rol ID is required',
-        invalid_type_error: 'Rol ID must be a string'
-    }).uuid({message: 'Rol ID must be a UUID string'})}, {
-        required_error: 'rol is required',
-        invalid_type_error: 'rol must be an object'
-    }),
     address: AddressSchema
 },{
     required_error: 'user is required',
     invalid_type_error: 'user must be an object'
 });
+
+export const UserSchema = UserSchemaBase.extend({rol: z.object({id: z.string({
+    required_error: 'Rol ID is required',
+    invalid_type_error: 'Rol ID must be a string'
+}).uuid({message: 'Rol ID must be a UUID string'})}, {
+    required_error: 'rol is required',
+    invalid_type_error: 'rol must be an object'
+})});
+
+export const UserRegisterSchema = UserSchemaBase;
 
 export type UserType = z.infer<typeof UserSchema>;
 
@@ -53,4 +56,14 @@ export const userValidation = async (user:unknown):Promise<z.SafeParseReturnType
 
 export const userValidationPartial = async (user: unknown):Promise<z.SafeParseReturnType<Partial<UserType>,Partial<UserType>>> => {
     return UserSchema.partial().safeParse(user);
+}
+
+export type UserRegisterType = z.infer<typeof UserRegisterSchema>;
+
+export const userRegisterValidation = async (user:unknown):Promise<z.SafeParseReturnType<UserRegisterType,UserRegisterType>> => {
+    return UserRegisterSchema.safeParse(user);
+}
+
+export const userRegistroValidationPartial = async (user: unknown):Promise<z.SafeParseReturnType<Partial<UserRegisterType>,Partial<UserRegisterType>>> => {
+    return UserRegisterSchema.partial().safeParse(user);
 }
