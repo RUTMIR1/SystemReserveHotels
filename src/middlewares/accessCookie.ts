@@ -15,7 +15,7 @@ export const accessCookie = async (req:Request, res:Response, next:NextFunction)
     req.payload = data as SessionData;
     console.log(req.payload);
     return next();
-}
+}   
 
 export const authVerification = (allowed:string[]=[])=>{
     return async (req:Request, res:Response, next:NextFunction):Promise<void>=>{

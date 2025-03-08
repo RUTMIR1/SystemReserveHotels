@@ -45,7 +45,7 @@ export class AuthService{
         if(!resultUniqueValidation.success) throw new ValidationException(resultUniqueValidation.message);
         let hashedPassword:string = await bcrypt.hash(user.password, 10);
         const [rol]:RowDataPacket[] = await querySql(`SELECT id FROM Rol WHERE name = 'user'`);
-        const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
                     , [user.name, user.last_name, user.age, user.email, user.username,
                          hashedPassword, user.phone_number, rol[0].id
                         ,user.address.country, user.address.province, user.address.city,

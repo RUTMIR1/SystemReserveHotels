@@ -1,5 +1,11 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/authService.js";
+import { SessionData } from "../types/requestSession.js";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import dotenv from 'dotenv';
+import { AuthException } from "../errors/authError.js";
+
+dotenv.config();
 
 export class authController{
     static async logIn(req:Request, res:Response):Promise<void>{
@@ -30,6 +36,20 @@ export class authController{
         try{
             await AuthService.registerUser(req.body);
             res.status(201).json({status:201, message:'User Created Successfully'})
+        }catch(err:any){
+            let status:number = err.status || 403, message:string = err.message as string || 'Error';
+            res.status(status).json({status, message});
+        }
+    }
+
+    static async me(req:Request, res:Response):Promise<void>{
+        try{
+            const token:string = req.cookies?.access_token;
+            if(!token || typeof token !== 'string'){
+                throw new AuthException('no cookie for data user');
+            }
+            const data:string | JwtPayload = jwt.verify(token, process.env.JWT_SECRET as string);
+            res.status(200).json(data);
         }catch(err:any){
             let status:number = err.status || 403, message:string = err.message as string || 'Error';
             res.status(status).json({status, message});
