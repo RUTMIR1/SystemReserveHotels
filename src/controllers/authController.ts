@@ -4,6 +4,7 @@ import { SessionData } from "../types/requestSession.js";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from 'dotenv';
 import { AuthException } from "../errors/authError.js";
+import { ExceptionsData } from "../types/exceptionsData.js";
 
 dotenv.config();
 
@@ -18,8 +19,9 @@ export class authController{
                 maxAge: 1000 * 60* 60
             }).send({message: "Session sucessfully", token});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -37,8 +39,9 @@ export class authController{
             await AuthService.registerUser(req.body);
             res.status(201).json({status:201, message:'User Created Successfully'})
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -46,13 +49,14 @@ export class authController{
         try{
             const token:string = req.cookies?.access_token;
             if(!token || typeof token !== 'string'){
-                throw new AuthException('no cookie for data user');
+                throw new AuthException('not cookie for data user', [{field:'cookie', message:'not cookie for data user'}]);
             }
             const data:string | JwtPayload = jwt.verify(token, process.env.JWT_SECRET as string);
             res.status(200).json(data);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 }

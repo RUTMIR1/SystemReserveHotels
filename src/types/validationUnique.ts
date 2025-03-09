@@ -1,4 +1,5 @@
 export interface ValidationUnique{
     success: boolean;
-    message: string,
+    message: string;
+    field: string;
 }

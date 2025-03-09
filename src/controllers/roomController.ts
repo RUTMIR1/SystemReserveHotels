@@ -1,6 +1,7 @@
 import { RoomDto } from "../dtos/RoomDto.js";
 import { Room } from "../models/roomModel.js";
 import { Request, Response } from "express";
+import { ExceptionsData } from "../types/exceptionsData.js";
 export class RoomController{
     
     static async getRooms(req:Request, res:Response):Promise<void>{
@@ -8,8 +9,9 @@ export class RoomController{
             let rooms:RoomDto[] = await Room.getRooms();
             res.status(200).json(rooms);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -19,8 +21,9 @@ export class RoomController{
             res.status(201).json({status:201, message: 'Room created successfully',
                 room: roomId});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -30,8 +33,9 @@ export class RoomController{
             res.status(200).json({status:200, message: `Room updated successfully`,
                 room: roomUpdate});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -41,8 +45,9 @@ export class RoomController{
             res.status(200).json({status: 200, message: `Room deleted successfully`,
                 room: roomDeleted});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -51,8 +56,9 @@ export class RoomController{
             let room:RoomDto = await Room.getRoomById(req.params.id);
             res.status(200).json(room);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
     

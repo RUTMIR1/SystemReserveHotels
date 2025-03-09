@@ -1,6 +1,7 @@
 import { ReservationDto } from "../dtos/ReservationDto.js";
 import { Reservation } from "../models/reservationModel.js";
 import { Request, Response } from "express";
+import { ExceptionsData } from "../types/exceptionsData.js";
 
 export class ReservationController{
     
@@ -9,8 +10,9 @@ export class ReservationController{
             let reservations:ReservationDto[] = await Reservation.getReservations();
             res.status(200).json(reservations);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
     
@@ -20,8 +22,9 @@ export class ReservationController{
             res.status(201).json({status: 201, message: 'Reservation created successfully!',
                 reservation: reservationId});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -31,8 +34,9 @@ export class ReservationController{
             res.status(200).json({status: 200, message: `Reservation updated successfully`,
                 reservation: reservationUpdate});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -42,8 +46,9 @@ export class ReservationController{
             res.status(200).json({status: 200, message: 'Reservation deleted successfully',
                 reservation: reservationDeleted});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
     
@@ -52,8 +57,9 @@ export class ReservationController{
             let reservation:ReservationDto = await Reservation.getReservationById(req.params.id);
             res.status(200).json(reservation);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -62,8 +68,9 @@ export class ReservationController{
             let reservations:ReservationDto[] = await Reservation.getReservationsByUsername(req.params.username);
             res.status(200).json(reservations);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 
@@ -73,8 +80,9 @@ export class ReservationController{
             let reservations:ReservationDto[] = await Reservation.getReservationsByUsername(req.payload.username);
             res.status(200).json(reservations);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     }
 }

@@ -1,14 +1,16 @@
 import { RolDto } from "../dtos/RolDto.js";
 import { Rol } from "../models/rolModel.js";
 import { Request, Response} from "express";
+import { ExceptionsData } from "../types/exceptionsData.js";
 export class RolController{
     static async getRols(req:Request, res:Response):Promise<void>{
         try{
             let rols:RolDto[] = await Rol.getRols();
             res.status(200).json(rols);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     };
     
@@ -18,8 +20,9 @@ export class RolController{
             res.status(201).json({status:201, message: `User created successfully`,
                 rol: rolId});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     };
     
@@ -29,8 +32,9 @@ export class RolController{
             res.status(200).json({status:200, message: `User updated successfully`,
                 rol: rolUpdate});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     };
 
@@ -40,8 +44,9 @@ export class RolController{
             res.status(200).json({status:200, message: 'Rol deleted successfully',
                 rol: rolDelete});
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     };
     
@@ -50,8 +55,9 @@ export class RolController{
             let rol:RolDto = await Rol.getRolById(req.params.id);
             res.status(200).json(rol);
         }catch(err:any){
-            let status:number = err.status || 403, message:string = err.message as string || 'Error';
-            res.status(status).json({status, message});
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
         }
     };
 }
