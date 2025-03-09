@@ -1,12 +1,22 @@
 import { readFile, readdir } from 'fs/promises';
 import { Connection } from 'mysql2/promise';
 import bcrypt from 'bcrypt';
+import { ExceptionsData } from '../types/exceptionsData.js';
 
 export const messageErrorZod = (zodMessage: any): string => {
     return zodMessage.error.issues.map((el:{message:string}) => {
         return el.message;
     }).join(' - ');
 };
+
+export const fieldsList = (zodMessage: any): ExceptionsData[]=>{
+    const fields: ExceptionsData[] = zodMessage.error.issues.map((el:{message:string, path:string[]}) => {
+        const field: string = el.path[0];
+        const message: string = el.message;
+        return {field, message};
+    });
+    return fields;
+}
 
 export const migrationDatabase = async (pathMigration: string, connection: Connection): Promise<void> => {
     const files: string[] = await readdir(pathMigration);
