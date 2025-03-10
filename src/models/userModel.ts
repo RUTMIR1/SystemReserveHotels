@@ -21,7 +21,7 @@ export class User{
         if(rows.length > 0){
             return {success: false, message: `User ${rows[0].field} already exists`, field:rows[0].field}
         }
-        return {success: true, message: 'User fields correct', field:rows[0].field};
+        return {success: true, message: 'User fields correct', field:'OK'};
     }
 
     static async validateExisting(user:UserType | Partial<UserType>):Promise<ValidationUnique>{

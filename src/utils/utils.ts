@@ -11,7 +11,7 @@ export const messageErrorZod = (zodMessage: any): string => {
 
 export const fieldsList = (zodMessage: any): ExceptionsData[]=>{
     const fields: ExceptionsData[] = zodMessage.error.issues.map((el:{message:string, path:string[]}) => {
-        const field: string = el.path[0];
+        const field: string = el.path[el.path.length-1];
         const message: string = el.message;
         return {field, message};
     });
