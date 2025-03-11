@@ -4,15 +4,21 @@ export const AddressSchema = z.object({
    country: z.string({
      required_error: 'Address country is required',
      invalid_type_error: 'Address country mus1t be a string'
-   }),
+   }).refine(
+    (value:string)=> value.length !== 0 || value ,{message: 'country is required'}
+    ).refine((value:string)=> value.length > 3, {message:'country must be at least 3 characters'}),
    province: z.string({
      required_error: 'Address province is required',
      invalid_type_error: 'Address province must be a string'
-   }),
+   }).refine(
+    (value:string)=> value.length !== 0 || value ,{message: 'province is required'}
+    ).refine((value:string)=> value.length > 3, {message:'province must be at least 3 characters'}),
    city: z.string({
      required_error: 'Address city is required',
      invalid_type_error: 'Address city must be a string'
-   }),
+   }).refine(
+    (value:string)=> value.length !== 0 || value ,{message: 'city is required'}
+    ).refine((value:string)=> value.length > 3, {message:'city must be at least 3 characters'}),
    house_number: z.number({
      required_error: 'Address house_number is required',
      invalid_type_error: 'Address house_number must be a number'
