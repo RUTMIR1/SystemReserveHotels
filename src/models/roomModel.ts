@@ -13,7 +13,9 @@ export class Room{
 
     static async validateExisting(room:RoomType | Partial<RoomType>):Promise<ValidationUnique>{
             if(room.categories){
-                    const categoryIds:string[] = room.categories.map(category => category.id);
+                    const categories:string[] = room.categories.map(category=> category.id);
+                    const categoriesNotRepeat:Set<string> = new Set(categories);
+                    const categoryIds:string[] = Array.from(categoriesNotRepeat);
 
                     let [RoomRow]:RowDataPacket[] = await querySql(`SELECT id FROM Category
                          WHERE id IN (${categoryIds.map(()=> '?').join(',')})`, [...categoryIds]);
@@ -23,9 +25,10 @@ export class Room{
     }
 
     static async getRooms():Promise<RoomDto[]>{
-        const [rows]:RowDataPacket[] = await querySql(`SELECT r.id, r.name, r.price, r.description,
-             r.image_url, r.state, JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'name', c.name)) AS categories FROM Room r 
-             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id GROUP BY r.id`);
+        const [rows]:RowDataPacket[] = await querySql(`SELECT DISTINCT r.id, r.name, r.price, r.description, r.image_url, r.state, 
+(SELECT JSON_ARRAYAGG(JSON_OBJECT('id', c2.id, 'name', c2.name)) FROM RoomCategory rc2 
+INNER JOIN Category c2 WHERE rc2.room_id = r.id AND c2.id = rc2.category_id) AS categories FROM Room r 
+             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id`);
         return rows.map((room:any)=>new RoomDto(room));
     }
 
@@ -59,9 +62,10 @@ export class Room{
 
     static async deleteRoom(id:string | null=null):Promise<RoomDto>{
         if(!id) throw new MissingParameterException('id is required', [{field:'id', message:'id is required'}]);
-        const [rows]:RowDataPacket[] = await querySql(`SELECT r.id, r.name, r.price, r.description,
-             r.image_url, r.state, JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'name', c.name)) AS categories FROM Room r 
-             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id WHERE r.id = ? GROUP BY r.id`, [id]);
+        const [rows]:RowDataPacket[] = await querySql(`SELECT DISTINCT r.id, r.name, r.price, r.description, r.image_url, r.state, 
+            (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', c2.id, 'name', c2.name)) FROM RoomCategory rc2 
+            INNER JOIN Category c2 WHERE rc2.room_id = r.id AND c2.id = rc2.category_id) AS categories FROM Room r 
+             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id WHERE r.name = 'Room2'`, [id]);
         if(rows.length === 0) throw new NotFoundException('Room not found for delete', [{field:'id', message:'not found'}]);
         const [result]:RowDataPacket[] = await querySql(`SELECT re.id FROM Reservation re INNER
              JOIN Room ro ON re.room_id = ro.id where ro.id = ? LIMIT 1`,[id]);
@@ -71,10 +75,20 @@ export class Room{
     }
     static async getRoomById(id:string | null=null):Promise<RoomDto>{
         if(!id) throw new MissingParameterException('id is required', [{field:'id', message:'id is required'}]);
-        const [rows]:RowDataPacket[] = await querySql(`SELECT r.id, r.name, r.price, r.description,
-             r.image_url, r.state, JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'name', c.name)) AS categories FROM Room r 
-             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id WHERE r.id = ? GROUP BY r.id`, [id]);
+        const [rows]:RowDataPacket[] = await querySql(`SELECT DISTINCT r.id, r.name, r.price, r.description, r.image_url, r.state, 
+            (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', c2.id, 'name', c2.name)) FROM RoomCategory rc2 
+            INNER JOIN Category c2 WHERE rc2.room_id = r.id AND c2.id = rc2.category_id) AS categories FROM Room r 
+             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id WHERE r.id = ?`, [id]);
         if(rows.length === 0) throw new NotFoundException('Room not found', [{field:'id', message:'not found'}]);
         return new RoomDto(rows[0]);
+    }
+
+    static async getRoomsByCategory(category:string | null=null):Promise<RoomDto[]>{
+        if(!category) throw new MissingParameterException('category is required', [{field:'id', message:'id is required'}]);
+        const [rows]:RowDataPacket[] = await querySql(`SELECT DISTINCT r.id, r.name, r.price, r.description, r.image_url, r.state, 
+            (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', c2.id, 'name', c2.name)) FROM RoomCategory rc2 
+            INNER JOIN Category c2 WHERE rc2.room_id = r.id AND c2.id = rc2.category_id) AS categories FROM Room r 
+             INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id WHERE c.name = ?`, [category]);
+        return rows.map((el:any)=> new RoomDto(el));
     }
 }

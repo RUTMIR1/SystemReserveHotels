@@ -79,7 +79,8 @@ BEGIN
         END WHILE;
     END IF;
 
-    SELECT r.id, r.name, r.price, r.description, r.image_url, r.state,
-    JSON_ARRAYAGG(JSON_OBJECT('id', c.id, 'name', c.name)) as categories FROM Room r LEFT JOIN RoomCategory rc ON r.id = rc.room_id 
-    LEFT JOIN Category c ON rc.category_id = c.id WHERE r.id = p_id GROUP BY r.id;
+    SELECT DISTINCT r.id, r.name, r.price, r.description, r.image_url, r.state, 
+    (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', c2.id, 'name', c2.name)) FROM RoomCategory rc2 
+    INNER JOIN Category c2 WHERE rc2.room_id = r.id AND c2.id = rc2.category_id) AS categories FROM Room r 
+    INNER JOIN RoomCategory rc ON r.id = rc.room_id INNER JOIN Category c ON rc.category_id = c.id WHERE r.id = p_id;
 END;#
