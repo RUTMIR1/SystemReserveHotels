@@ -27,6 +27,7 @@ CREATE PROCEDURE insert_reservation(
     IN p_code VARCHAR(255),
     IN p_amount DECIMAL(10, 2),
     IN p_state VARCHAR(255),
+    IN p_days INT,
     IN p_user_id CHAR(36),
     IN p_room_id CHAR(36)
 )
@@ -36,9 +37,9 @@ BEGIN
     SET id_reservation = UUID();
 
     INSERT INTO Reservation (id, reservation_date_start, reservation_date_end,
-     check_in, check_out, code, amount, state, user_id, room_id)
+     check_in, check_out, code, amount, state, days, user_id, room_id)
     VALUES (id_reservation, p_reservation_date_start, p_reservation_date_end,
-     p_check_in, p_check_out, p_code, p_amount, p_state, p_user_id, p_room_id);
+     p_check_in, p_check_out, p_code, p_amount, p_state, p_days, p_user_id, p_room_id);
 
     SELECT id_reservation AS id;
 END;#
@@ -54,6 +55,7 @@ CREATE PROCEDURE update_reservation(
     IN p_code VARCHAR(255),
     IN p_amount DECIMAL(10, 2),
     IN p_state VARCHAR(255),
+    IN p_days INT,
     IN p_user_id CHAR(36),
     IN p_room_id CHAR(36)
 )
@@ -66,13 +68,14 @@ BEGIN
     code = COALESCE(p_code, code),
     amount = COALESCE(p_amount, amount),
     state = COALESCE(p_state, state),
+    days = COALESCE(p_days, days),
     user_id = COALESCE(p_user_id, user_id),
     room_id = COALESCE(p_room_id, room_id)
     WHERE id = p_id;
 
     SELECT re.id, re.reservation_date_start,
             re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
+            re.state, re.days, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
             u.phone_number, rol.id as rol_id, rol.name as rol_name,
             a.id as address_id, a.country, a.province, a.city, a.house_number,
             a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
@@ -82,7 +85,7 @@ BEGIN
             INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
             re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
             JOIN Category c ON rc.category_id = c.id WHERE re.id = p_id GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
-         re.check_out, re.code, re.amount, re.state, 
+         re.check_out, re.code, re.amount, re.state, re.days,
          u.id, u.name, u.last_name, u.age, u.email, u.username, 
          u.phone_number, rol.id, rol.name, 
          a.id, a.country, a.province, a.city, a.house_number, a.floor, 
@@ -97,7 +100,7 @@ CREATE PROCEDURE get_reservation(
 BEGIN
     SELECT re.id, re.reservation_date_start,
             re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
+            re.state, re.days, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
             u.phone_number, rol.id as rol_id, rol.name as rol_name,
             a.id as address_id, a.country, a.province, a.city, a.house_number,
             a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
@@ -107,7 +110,7 @@ BEGIN
             INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
             re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
             JOIN Category c ON rc.category_id = c.id WHERE re.id = p_id GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
-         re.check_out, re.code, re.amount, re.state, 
+         re.check_out, re.code, re.amount, re.state, re.days, 
          u.id, u.name, u.last_name, u.age, u.email, u.username, 
          u.phone_number, rol.id, rol.name, 
          a.id, a.country, a.province, a.city, a.house_number, a.floor, 
@@ -120,7 +123,7 @@ CREATE PROCEDURE get_all_reservations()
 BEGIN
     SELECT re.id, re.reservation_date_start,
             re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
+            re.state, re.days, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
             u.phone_number, rol.id as rol_id, rol.name as rol_name,
             a.id as address_id, a.country, a.province, a.city, a.house_number,
             a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
@@ -130,7 +133,7 @@ BEGIN
             INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
             re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
             JOIN Category c ON rc.category_id = c.id GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
-         re.check_out, re.code, re.amount, re.state, 
+         re.check_out, re.code, re.amount, re.state, re.days,
          u.id, u.name, u.last_name, u.age, u.email, u.username, 
          u.phone_number, rol.id, rol.name, 
          a.id, a.country, a.province, a.city, a.house_number, a.floor, 
@@ -145,7 +148,7 @@ CREATE PROCEDURE get_reservations_by_username(
 BEGIN
     SELECT re.id, re.reservation_date_start,
             re.reservation_date_end, re.check_in, re.check_out, re.code, re.amount,
-            re.state, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
+            re.state, re.days, u.id as user_id, u.name, u.last_name, u.age, u.email, u.username,
             u.phone_number, rol.id as rol_id, rol.name as rol_name,
             a.id as address_id, a.country, a.province, a.city, a.house_number,
             a.floor, ro.id as room_id, ro.name as room_name, ro.price, ro.description,
@@ -155,7 +158,7 @@ BEGIN
             INNER JOIN Rol rol ON u.rol_id = rol.id INNER JOIN Room ro ON
             re.room_id = ro.id INNER JOIN RoomCategory rc ON ro.id = rc.room_id INNER
             JOIN Category c ON rc.category_id = c.id WHERE u.username = p_username GROUP BY re.id, re.reservation_date_start, re.reservation_date_end, re.check_in, 
-         re.check_out, re.code, re.amount, re.state, 
+         re.check_out, re.code, re.amount, re.state, re.days,
          u.id, u.name, u.last_name, u.age, u.email, u.username, 
          u.phone_number, rol.id, rol.name, 
          a.id, a.country, a.province, a.city, a.house_number, a.floor, 

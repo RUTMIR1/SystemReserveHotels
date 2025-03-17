@@ -57,6 +57,12 @@ const BaseReservationSchema = z.object({
         required_error: 'amount is required',
         invalid_type_error: 'amount must be a number'
     }).positive({ message: 'Amount must be positive' }),
+    days: z.number({
+        required_error: 'days is required',
+        invalid_type_error: 'days must be a number'
+    }).positive({
+        message: 'days must be positive'
+    }),
     state: z.enum(['finalized', 'current', 'canceled'], {
         required_error: 'state is required',
         invalid_type_error: 'state must be a string',
