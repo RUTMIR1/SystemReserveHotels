@@ -11,7 +11,7 @@ CREATE TABLE Room(
 );#
 
 INSERT INTO Room (id, name, price, description, image_url, state) VALUES
-    ('d4b522f1-e3a4-11ef-8f63-0242ac130002','Room1', 150.00, 'A spacious, elegant room with a king-sized bed and a full-size bathroom.',
+    ('d4b522f1-e3a4-11ef-8f63-0242ac130002','Room1', 25.00, 'A spacious, elegant room with a king-sized bed and a full-size bathroom.',
     'https://example.com/deluxe-room-image.jpg', 'active'),
     ('d4b526ac-e3a4-11ef-8f63-0242ac130002','Room2', 100.00, 'A cozy, comfortable room with a queen-sized bed and a small bathroom.',
     'https://example.com/standard-room-image.jpg', 'active');#

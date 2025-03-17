@@ -9,6 +9,7 @@ CREATE TABLE Reservation(
     code VARCHAR(255) NOT NULL UNIQUE,
     amount DECIMAL(10, 2) NOT NULL,
     state ENUM('finalized', 'current', 'canceled') NOT NULL,
+    days INT NOT NULL,
     user_id CHAR(36) NOT NULL,
     room_id CHAR(36) NOT NULL,
     PRIMARY KEY (id),

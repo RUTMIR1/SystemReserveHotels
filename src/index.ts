@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser';
 import { accessCookie } from './middlewares/accessCookie.js';
 import { authRoute } from './routes/authRoute.js';
 import { corsMiddleware } from './middlewares/cors.js';
+import { payRouter } from './routes/payRoute.js';
 
 
 const PORT:number = Number(process.env.PORT) || 3000;
@@ -31,6 +32,7 @@ app.use('/Address', addressRoute);
 app.use('/Room', roomRoute);
 app.use('/Reservation', reservationRoute);
 app.use('/Category', categoryRoute);
+app.use('/Pay', payRouter);
 
 app.use('*', (req:Request, res:Response):void=>{
     res.setHeader('Content-Type', 'text/html ; charset=utf-8');
