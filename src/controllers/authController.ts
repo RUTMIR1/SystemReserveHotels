@@ -11,12 +11,20 @@ dotenv.config();
 export class authController{
     static async logIn(req:Request, res:Response):Promise<void>{
         try{
-            const token:string = await AuthService.loginUser(req.body);
+            const {token, refreshToken} = await AuthService.loginUser(req.body);
+
+            res.cookie('refresh_token', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: true,
+                maxAge: 1000 * 60 * 60 * 24
+            })
+
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: true,
-                maxAge: 1000 * 60* 60
+                maxAge: 1000 * 60* 10
             }).send({message: "Session sucessfully", token});
         }catch(err:any){
             let status:number = err.status || 403, message:string = err.message as string || 'Error'
@@ -53,6 +61,27 @@ export class authController{
             }
             const data:string | JwtPayload = jwt.verify(token, process.env.JWT_SECRET as string);
             res.status(200).json(data);
+        }catch(err:any){
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
+        }
+    }
+    static async refresherToken(req:Request, res:Response):Promise<void>{
+        try{
+            const tokenRefresh:string = req.cookies?.refresh_token;
+            if(!tokenRefresh || typeof tokenRefresh !== 'string'){
+                throw new AuthException('not cookie for refresh cookie', [{field:'cookie', message:'not cookie for refresh cookie'}]);
+            }
+            jwt.verify(tokenRefresh, process.env.JWT_REFRESH_SECRET as string, (err, decoded)=>{
+                if(err){
+                    return res.status(406).json({message: 'Unauthorized'});
+                }else{
+                    accessToken = jwt.sign({
+                        
+                    })
+                }
+            });
         }catch(err:any){
             let status:number = err.status || 403, message:string = err.message as string || 'Error'
             , data:ExceptionsData = err.data || [{field:'', message:''}];

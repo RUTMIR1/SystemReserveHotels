@@ -17,11 +17,17 @@ import { ValidationUnique } from "../types/validationUnique.js";
 
 dotenv.config();
 
-const JWT_SECRET:string = process.env.JWT_SECRET || "DEFAULT";
+interface ITokens{
+    token:string;
+    refreshToken:string;
+}
+
+const JWT_SECRET:string = process.env.JWT_SECRET || "DEFAULT";  
+const JWT_REFRESH_SECRET:string = process.env.JWT_REFRESH_SECRET || "DEFAULT";
 
 export class AuthService{
 
-    static async loginUser(dataAuth:AuthType | null=null):Promise<string>{
+    static async loginUser(dataAuth:AuthType | null=null):Promise<ITokens>{
         if(!dataAuth) throw new MissingParameterException('User data login is required', [{field:'user', message:'data login is required'}]);
         const resultValidation:SafeParseReturnType<AuthType, AuthType> = await authValidation(dataAuth);
         if(!resultValidation.success) throw new ValidationException(messageErrorZod(resultValidation), fieldsList(resultValidation));
@@ -32,9 +38,12 @@ export class AuthService{
         if(!resultCompare) throw new AuthException('password incorrect', [{field:'password', message:'password incorrect'}]);
         const newDataAuth:SessionData = {username: rows[0].username, rol:rows[0].name, id:rows[0].id};
         const token:string = jwt.sign(newDataAuth, JWT_SECRET, { 
-            expiresIn: '1h'
+            expiresIn: '1m'
         });
-        return token;
+        const refreshToken:string =jwt.sign('',JWT_REFRESH_SECRET,{
+            expiresIn: '24h'
+        });
+        return {token, refreshToken};
     }
 
     static async registerUser(user:UserRegisterType | null=null):Promise<void>{
