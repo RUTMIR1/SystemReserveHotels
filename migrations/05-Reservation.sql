@@ -10,6 +10,8 @@ CREATE TABLE Reservation(
     amount DECIMAL(10, 2) NOT NULL,
     state ENUM('finalized', 'current', 'canceled') NOT NULL,
     days INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     user_id CHAR(36) NOT NULL,
     room_id CHAR(36) NOT NULL,
     PRIMARY KEY (id),

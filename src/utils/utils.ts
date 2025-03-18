@@ -3,6 +3,16 @@ import { Connection } from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import { ExceptionsData } from '../types/exceptionsData.js';
 
+export const createCodeReservation = (codeFormat:string):string =>{
+    let codes:RegExpMatchArray | null = codeFormat.match(/\d+/g);
+    let numCode:string = '';
+    if(codes) numCode = (String(parseInt(codes.join())+1));
+    let codeExample:string = "CODEXXXXX";
+    let newCode:string = '';
+    newCode = codeExample.replace(/X+$/, cad => numCode.padStart(cad.length, '0'));
+    return newCode;
+}
+
 export const messageErrorZod = (zodMessage: any): string => {
     return zodMessage.error.issues.map((el:{message:string}) => {
         return el.message;

@@ -1,5 +1,5 @@
 import { querySql, queryTransactionSql } from "../database.js";
-import { fieldsList, messageErrorZod } from "../utils/utils.js";
+import { createCodeReservation, fieldsList, messageErrorZod } from "../utils/utils.js";
 import { ValidationUnique } from '../types/validationUnique.js'
 import { RowDataPacket } from 'mysql2';
 import { ReservationDto } from "../dtos/ReservationDto.js";
@@ -48,10 +48,10 @@ export class Reservation{
         if(!uniqueFieldsResult.success) throw new ValidationException(uniqueFieldsResult.message, [{field:uniqueFieldsResult.field, message:uniqueFieldsResult.message}]);
         const validationExisting:ValidationUnique = await this.validateExisting(reservation);
         if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
-        const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_reservation(?, ?, ?, ?, ?,
+        const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_reservation(?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?)`, [reservation.reservation_date_start, reservation.reservation_date_end,
                  reservation.check_in, reservation.check_out, 
-                 reservation.code, reservation.amount, reservation.state,
+                 reservation.code, reservation.amount, reservation.state, reservation.days,
                   reservation.user.id, reservation.room.id ]);
         return rows[0][0].id;
     }
@@ -73,10 +73,10 @@ export class Reservation{
         let userId:string|null=null, roomId:string|null=null;
         if(reservation.user) userId = reservation.user.id;
         if(reservation.room) roomId = reservation.room.id;
-        const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL update_reservation( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL update_reservation( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             , [id, reservation.reservation_date_start, reservation.reservation_date_end,
                  reservation.check_in, reservation.check_out, reservation.code,
-                reservation.amount, reservation.state, userId, roomId]);
+                reservation.amount, reservation.state, reservation.days, userId, roomId]);
         return new ReservationDto(rows[0][0]);
     }
 
@@ -101,5 +101,27 @@ export class Reservation{
         if(rows.length === 0) throw new NotFoundException('User not found', [{field:'id', message:'not found'}]);
         const [result]:RowDataPacket[] = await querySql(`CALL get_reservations_by_username(?)`, [username]);
         return result[0].map((re:any)=> new ReservationDto(re));
+    }
+    static async generateReservationPaid(reservation:ReservationType){
+        if(!reservation) throw new MissingParameterException('Reservation data is required', [{field:'reservation', message:'data is required'}]);
+        const validationResult:SafeParseReturnType<ReservationType, ReservationType> = await reservationValidation(reservation);
+        if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult), fieldsList(validationResult));
+        const validationExisting:ValidationUnique = await this.validateExisting(reservation);
+        if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
+        const milsegDays = 1000 * 60 * 60 * 24 * reservation.days;
+        let [rows]:RowDataPacket[] = await querySql('SELECT price FROM Room WHERE id = ? LIMIT 1', [reservation.room.id]);
+        reservation.reservation_date_start = new Date().toISOString().split('T')[0];
+        reservation.reservation_date_end = new Date(new Date().getTime() + milsegDays).toISOString().split('T')[0];
+        reservation.check_in = reservation.reservation_date_start;
+        reservation.check_out = reservation.reservation_date_end;
+        reservation.state = 'current';
+        reservation.amount = reservation.days * rows[0].price;
+        let [codes]:RowDataPacket[] = await querySql('SELECT code FROM Reservation ORDER BY created_at DESC LIMIT 1');
+        reservation.code = createCodeReservation(codes[0].code);
+        await queryTransactionSql(`CALL insert_reservation(?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?)`, [reservation.reservation_date_start, reservation.reservation_date_end,
+                 reservation.check_in, reservation.check_out, 
+                 reservation.code, reservation.amount,  reservation.state, reservation.days,
+                  reservation.user.id, reservation.room.id ]);
     }
 }

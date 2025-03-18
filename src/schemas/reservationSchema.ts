@@ -15,7 +15,7 @@ const BaseReservationSchema = z.object({
         if (isNaN(date.getTime())) throw new Error('reservation_date_start Invalid date');
         let dateStr:string = date.toISOString().split('T')[0];
         return dateStr;
-    }),
+    }).optional(),
     reservation_date_end: z.string({
         required_error: 'reservation_date_end is required',
         invalid_type_error: 'reservation_date_end must be a string'
@@ -26,7 +26,7 @@ const BaseReservationSchema = z.object({
         if (isNaN(date.getTime())) throw new Error('reservation_date_end Invalid date');
         let dateStr:string = date.toISOString().split('T')[0];
         return dateStr;
-    }),
+    }).optional(),
     check_in: z.string({
         required_error: 'check_in date is required',
         invalid_type_error: 'check_in date must be a string'
@@ -37,7 +37,7 @@ const BaseReservationSchema = z.object({
         if (isNaN(date.getTime())) throw new Error('check_in Invalid date');
         let dateStr:string = date.toISOString().split('T')[0];
         return dateStr;
-    }),
+    }).optional(),
     check_out: z.string({
         required_error: 'check_out date is required',
         invalid_type_error: 'check_out date must be a string'
@@ -48,15 +48,15 @@ const BaseReservationSchema = z.object({
         if (isNaN(date.getTime())) throw new Error('check_out Invalid date');
         let dateStr:string = date.toISOString().split('T')[0];
         return dateStr;
-    }),
+    }).optional(),
     code: z.string({
         required_error: 'code is required',
         invalid_type_error: 'code must be a string'
-    }).regex(/CODE\d{5}/, { message: 'Invalid code, must be CODEXXXXX' }),
+    }).regex(/CODE\d{5}/, { message: 'Invalid code, must be CODEXXXXX' }).optional(),
     amount: z.number({
         required_error: 'amount is required',
         invalid_type_error: 'amount must be a number'
-    }).positive({ message: 'Amount must be positive' }),
+    }).positive({ message: 'Amount must be positive' }).optional(),
     days: z.number({
         required_error: 'days is required',
         invalid_type_error: 'days must be a number'
@@ -66,7 +66,7 @@ const BaseReservationSchema = z.object({
     state: z.enum(['finalized', 'current', 'canceled'], {
         required_error: 'state is required',
         invalid_type_error: 'state must be a string',
-    }),
+    }).optional(),
     user: z.object({
         id: z.string({
             required_error: 'user id is required',
@@ -82,6 +82,7 @@ const BaseReservationSchema = z.object({
 });
 
 export const ReservationSchema = BaseReservationSchema.superRefine((data, ctx) => {
+    if(data.reservation_date_end && data.reservation_date_start && data.check_in && data.check_out){
     if (data.reservation_date_start >= data.reservation_date_end) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -89,6 +90,7 @@ export const ReservationSchema = BaseReservationSchema.superRefine((data, ctx) =
             message: 'reservation_date_start must be before reservation_date_end'
         });
     }
+    
     if (data.check_in >= data.check_out) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -123,6 +125,7 @@ export const ReservationSchema = BaseReservationSchema.superRefine((data, ctx) =
             path: ['check_out'],
             message: 'check_out cannot be before reservation_date_start'
         });
+    }
     }
 });
 

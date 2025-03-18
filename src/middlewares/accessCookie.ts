@@ -7,7 +7,7 @@ dotenv.config();
 
 export const accessCookie = async (req:Request, res:Response, next:NextFunction):Promise<void>=>{
     const token:string = req.cookies?.access_token;
-    req.payload = {username: '', rol:''} as SessionData;
+    req.payload = {username: '', rol:'', id: ''} as SessionData;
     if(!token || typeof token !== 'string'){
         return next();
     }

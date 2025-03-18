@@ -25,12 +25,12 @@ export class AuthService{
         if(!dataAuth) throw new MissingParameterException('User data login is required', [{field:'user', message:'data login is required'}]);
         const resultValidation:SafeParseReturnType<AuthType, AuthType> = await authValidation(dataAuth);
         if(!resultValidation.success) throw new ValidationException(messageErrorZod(resultValidation), fieldsList(resultValidation));
-        const [rows]:RowDataPacket[] = await querySql(`SELECT u.username, u.password, r.name FROM User u
+        const [rows]:RowDataPacket[] = await querySql(`SELECT u.id, u.username, u.password, r.name FROM User u
              INNER JOIN Rol r ON u.rol_id = r.id WHERE username = ?`, [dataAuth.username]);
         if(rows.length === 0) throw new NotFoundException('User not exist', [{field:'username', message:'username not exist'}]);
         const resultCompare:boolean = await bcrypt.compare(dataAuth.password, rows[0].password);
         if(!resultCompare) throw new AuthException('password incorrect', [{field:'password', message:'password incorrect'}]);
-        const newDataAuth:SessionData = {username: rows[0].username, rol:rows[0].name};
+        const newDataAuth:SessionData = {username: rows[0].username, rol:rows[0].name, id:rows[0].id};
         const token:string = jwt.sign(newDataAuth, JWT_SECRET, { 
             expiresIn: '1h'
         });
