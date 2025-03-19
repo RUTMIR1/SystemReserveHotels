@@ -3,7 +3,7 @@ import { AuthType, authValidation } from "../schemas/authSchema.js";
 import { fieldsList, messageErrorZod } from "../utils/utils.js";
 import { querySql, queryTransactionSql } from "../database.js";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { SessionData } from "../types/requestSession.js";
 import bcrypt from 'bcrypt';
 import { ValidationException } from "../errors/validationError.js";
@@ -40,7 +40,7 @@ export class AuthService{
         const token:string = jwt.sign(newDataAuth, JWT_SECRET, { 
             expiresIn: '1m'
         });
-        const refreshToken:string =jwt.sign('',JWT_REFRESH_SECRET,{
+        const refreshToken:string =jwt.sign(newDataAuth, JWT_REFRESH_SECRET,{
             expiresIn: '24h'
         });
         return {token, refreshToken};
@@ -61,4 +61,25 @@ export class AuthService{
                          user.address.house_number,
                         user.address.floor]);
     }
+    static async refreshTokens(tokenRefresh:string){
+            if(!tokenRefresh || typeof tokenRefresh !== 'string'){
+                throw new AuthException('not cookie for refresh cookie', [{field:'cookie', message:'not cookie for refresh cookie'}]);
+            }
+            let newToken:string = '', newRefreshToken:string = '';
+            jwt.verify(tokenRefresh, process.env.JWT_REFRESH_SECRET as string, (err, decoded)=>{
+                if(err){
+                    throw new AuthException('unauthorized', [{field:'token', message: 'unauthorized'}]);
+                }else{
+                    let {username, rol, id} = decoded as JwtPayload;
+                    newToken = jwt.sign({username, rol, id} as JwtPayload, 
+                        process.env.JWT_SECRET as string, {
+                            expiresIn: '1m'
+                        });
+                    newRefreshToken =jwt.sign({username, rol, id} as JwtPayload, 
+                        process.env.JWT_REFRESH_SECRET as string,{
+                            expiresIn: '24h'
+                        });
+                }});
+            return { newToken, newRefreshToken};
+    } 
 }
