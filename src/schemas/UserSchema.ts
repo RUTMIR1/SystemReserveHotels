@@ -20,6 +20,12 @@ const UserSchemaBase = z.object({
     }).int({message: 'User age must be a number integer'}).positive(
         {message: 'User age must be positive'}
     ).min(18, {message: 'User age must be greater than or equal to 18'}),
+    dni: z.string({
+        required_error:'User dni is required',
+        invalid_type_error:'User dni must be a string'
+    }).refine(
+        (value:string)=> value.length !== 0 || value ,{message: 'dni is required'}
+    ).refine((value:string)=> value.length > 3, {message:'dni must be at least 3 characters'}),
     email: z.string({
         required_error: 'User email is required',
         invalid_type_error: 'User email must be a string',

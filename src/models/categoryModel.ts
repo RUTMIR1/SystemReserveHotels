@@ -10,7 +10,6 @@ import { ValidationException } from '../errors/validationError.js';
 import { NotFoundException } from '../errors/notFoundError.js';
 
 export class Category{
-
     static async validateUniqueFieldsCategory(category:CategoryType | Partial<CategoryType>):Promise<ValidationUnique>{
             let {name} = category;
             const [rows]:RowDataPacket[] = await querySql('SELECT name FROM Category WHERE name = ? LIMIT 1',

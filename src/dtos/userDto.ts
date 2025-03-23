@@ -6,6 +6,7 @@ export class UserDto{
     name:string;
     last_name: string;
     age: number;
+    dni: string;
     email: string;
     username: string;
     phone_number: string;
@@ -16,6 +17,7 @@ export class UserDto{
         name,
         last_name,
         age,
+        dni,
         email,
         username,
         phone_number,
@@ -32,6 +34,7 @@ export class UserDto{
         name: string;
         last_name: string;
         age: number;
+        dni: string;
         email: string;
         username: string;
         phone_number: string;
@@ -51,6 +54,7 @@ export class UserDto{
             this.name = name;
             this.last_name = last_name;
             this.age = age;
+            this.dni = dni;
             this.email = email;
             this.username = username;
             this.phone_number = phone_number;

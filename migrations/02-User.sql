@@ -5,6 +5,7 @@ id CHAR(36) NOT NULL default (UUID()),
 name varchar(100) NOT NULL,
 last_name varchar(100) NOT NULL,
 age INT NOT NULL,
+dni varchar(100) NOT NULL,
 email VARCHAR(100) NOT NULL UNIQUE,
 username VARCHAR(100) NOT NULL UNIQUE,
 password VARCHAR(100) NOT NULL,
@@ -21,6 +22,7 @@ FOREIGN KEY (rol_id) REFERENCES Rol(id)
     IN p_name VARCHAR(100),
     IN p_last_name VARCHAR(100),
     IN p_age INT,
+    IN p_dni VARCHAR(100),
     IN p_email VARCHAR(100),
     IN p_username VARCHAR(100),
     IN p_password VARCHAR(100),
@@ -32,13 +34,14 @@ FOREIGN KEY (rol_id) REFERENCES Rol(id)
     name = COALESCE(p_name, name),
     last_name = COALESCE(p_last_name, last_name),
     age = COALESCE(p_age, age),
+    dni = COALESCE(p_dni, dni),
     email = COALESCE(p_email, email),
     username = COALESCE(p_username, username),
     password = COALESCE(p_password, password),
     phone_number = COALESCE(p_phone_number, phone_number),
     rol_id = COALESCE(p_rol_id, rol_id)
     WHERE id = p_id;
-    SELECT u.id, u.name, u.last_name, u.age, u.email, u.username, u.phone_number,
+    SELECT u.id, u.name, u.last_name, u.age, u.dni, u.email, u.username, u.phone_number,
     r.id as rol_id, r.name as rol_name, a.id as address_id, a.country, a.province,
      a.city, a.house_number, a.floor FROM User u 
     INNER JOIN Rol r ON u.rol_id = r.id INNER JOIN Address a ON u.id = a.user_id
@@ -51,6 +54,7 @@ FOREIGN KEY (rol_id) REFERENCES Rol(id)
     IN p_name VARCHAR(100),
     IN p_last_name VARCHAR(100),
     IN p_age INT,
+    IN p_dni VARCHAR(100),
     IN p_email VARCHAR(100),
     IN p_username VARCHAR(100),
     IN p_password VARCHAR(100),
@@ -65,8 +69,8 @@ FOREIGN KEY (rol_id) REFERENCES Rol(id)
  BEGIN
     DECLARE last_id CHAR(36);
 
-    INSERT INTO User (name, last_name, age, email, username, password, phone_number, rol_id)
-    VALUES (p_name, p_last_name, p_age, p_email, p_username, p_password, p_phone_number, p_rol_id);
+    INSERT INTO User (name, last_name, age, dni, email, username, password, phone_number, rol_id)
+    VALUES (p_name, p_last_name, p_age, p_dni, p_email, p_username, p_password, p_phone_number, p_rol_id);
 
     SET last_id = (SELECT id FROM User WHERE username = p_username LIMIT 1);
 

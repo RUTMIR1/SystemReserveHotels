@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS Rol(
 INSERT INTO Rol (id, name) VALUES ('6938f783-e1e7-11ef-8f63-0242ac130002','administrator');#
 INSERT INTO Rol (id, name) VALUES ('693b0754-e1e7-11ef-8f63-0242ac130002','user');#
 INSERT INTO Rol (id, name) VALUES ('6939d182-e1e7-11ef-8f63-0242ac130002','owner');#
+INSERT INTO Rol (id, name) VALUES ('611ee182-e1e7-11ef-8f63-0242ac130002','temp');#
 
 DROP PROCEDURE IF EXISTS insert_rol;#
 

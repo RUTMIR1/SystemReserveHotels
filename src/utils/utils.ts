@@ -51,11 +51,11 @@ export const insertUsers = async (connection:Connection):Promise<void>=>{
     let pass1:string = await bcrypt.hash('admin',10);
     let pass2:string = await bcrypt.hash('12345',10);
     
-    await connection.query(`INSERT INTO User (id, name, last_name, age, email, username, password, phone_number, rol_id) values
- ('431c358a-e1f4-11ef-8f63-0242ac130002' ,'John', 'Doe', 30, 'Jhon@gmail.com', 'admin', ?, '1234567','6939d182-e1e7-11ef-8f63-0242ac130002')`, [pass1]);
+    await connection.query(`INSERT INTO User (id, name, last_name, age, dni, email, username, password, phone_number, rol_id) values
+ ('431c358a-e1f4-11ef-8f63-0242ac130002' ,'John', 'Doe', 30, 32222454, 'Jhon@gmail.com', 'admin', ?, '1234567','6939d182-e1e7-11ef-8f63-0242ac130002')`, [pass1]);
     await connection.query(`
-        INSERT INTO User (id, name, last_name, age, email, username, password, phone_number, rol_id) values
- ('431d6c93-e1f4-11ef-8f63-0242ac130002', 'Marco', 'Hans', 25, 'Marco@gmail.com', 'tomi1', ?, '111333454', '693b0754-e1e7-11ef-8f63-0242ac130002')
+        INSERT INTO User (id, name, last_name, age, dni, email, username, password, phone_number, rol_id) values
+ ('431d6c93-e1f4-11ef-8f63-0242ac130002', 'Marco', 'Hans', 25, 45569642, 'Marco@gmail.com', 'tomi1', ?, '111333454', '693b0754-e1e7-11ef-8f63-0242ac130002')
         `, [pass2]);
     await connection.query(`
         INSERT INTO Address (country, province, city, house_number, floor, user_id) VALUES

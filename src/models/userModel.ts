@@ -11,13 +11,13 @@ import { MissingParameterException } from '../errors/missingParameterError.js';
 import { ValidationException } from '../errors/validationError.js'
 export class User{
     static async validateUniqueFields(user:UserType | Partial<UserType>):Promise<ValidationUnique>{
-        let { username ,phone_number, email} =  user;
+        let { username ,phone_number, email, dni} =  user;
         let [rows]:RowDataPacket[] = await querySql(
             `SELECT (CASE WHEN email = ? THEN 'email' WHEN username = ?
-             THEN 'username' WHEN phone_number = ? THEN 'phone_number' END)
-              AS field FROM User WHERE email = ? OR username = ? OR phone_number = ?
+             THEN 'username' WHEN phone_number = ? THEN 'phone_number' WHEN dni = ? END)
+              AS field FROM User WHERE email = ? OR username = ? OR phone_number = ? OR dni = ?
                LIMIT 1`,
-            [email, username, phone_number, email, username, phone_number]);
+            [email, username, phone_number, dni, email, username, phone_number, dni]);
         if(rows.length > 0){
             return {success: false, message: `User ${rows[0].field} already exists`, field:rows[0].field}
         }
@@ -35,7 +35,7 @@ export class User{
 
     static async getUsers():Promise<UserDto[]>{
         let [rows]:RowDataPacket[] = await querySql(`SELECT u.id, u.name, 
-            u.last_name, u.age, u.email, u.username,
+            u.last_name, u.age, u.dni, u.email, u.username,
                      u.phone_number, r.id as rol_id, r.name as rol_name,
                      a.id as address_id, a.country, a.province, a.city, a.house_number, a.floor
                      FROM User u INNER JOIN Rol r ON u.rol_id = r.id
@@ -54,7 +54,7 @@ export class User{
         if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
         let hashedPassword:string = await bcrypt.hash(user.password, 10);
         let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-            , [user.name, user.last_name, user.age, user.email, user.username,
+            , [user.name, user.last_name, user.age, user.dni, user.email, user.username,
                  hashedPassword, user.phone_number, user.rol.id
                 ,user.address.country, user.address.province, user.address.city,
                  user.address.house_number,
@@ -65,7 +65,7 @@ export class User{
     static async deleteUserById(id:string | null=null):Promise<UserDto>{
         if(!id) throw new MissingParameterException('User id is required for delete', [{field:'id', message:'id is required'}]);
         let [rows]:RowDataPacket[] = await queryTransactionSql(`SELECT u.id, u.name, u.last_name,
-            u.age, u.username, u.phone_number, r.id as rol_id,
+            u.age, u.dni, u.username, u.phone_number, r.id as rol_id,
             r.name as rol_name, a.id as address_id, a.country, a.province,
              a.city, a.house_number, a.floor
              FROM User u INNER JOIN Rol r ON u.rol_id = r.id
@@ -94,7 +94,7 @@ export class User{
         let rolId:string | null = null;
         if(user.rol) rolId = user.rol.id;
         let [result] = await queryTransactionSql(`Call update_user(
-            ?, ? ,? ,? ,? , ?, ?, ?, ?)`, [id, user.name, user.last_name, user.age,
+            ?, ? ,? ,? ,? , ?, ?, ?, ?)`, [id, user.name, user.last_name, user.age, user.dni,
                  user.email, user.username,
                 user.password, user.phone_number, rolId]);
         return new UserDto(result[0][0]);
@@ -103,7 +103,7 @@ export class User{
     static async getUserById(id:string | null=null):Promise<UserDto> {
         if(!id) throw new MissingParameterException("id params is required", [{field:'id', message:'id is required'}]);
         let [rows]:RowDataPacket[] = await querySql(`SELECT u.id, u.name, u.last_name,
-            u.age, u.username, u.phone_number, r.id as rol_id,
+            u.age, u.dni, u.username, u.phone_number, r.id as rol_id,
             r.name as rol_name, a.id as address_id, a.country, a.province,
              a.city, a.house_number, a.floor
              FROM User u INNER JOIN Rol r ON u.rol_id = r.id
