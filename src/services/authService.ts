@@ -38,7 +38,7 @@ export class AuthService{
         if(!resultCompare) throw new AuthException('password incorrect', [{field:'password', message:'password incorrect'}]);
         const newDataAuth:SessionData = {username: rows[0].username, rol:rows[0].name, id:rows[0].id};
         const token:string = jwt.sign(newDataAuth, JWT_SECRET, { 
-            expiresIn: '1m'
+            expiresIn: '1h'
         });
         const refreshToken:string =jwt.sign(newDataAuth, JWT_REFRESH_SECRET,{
             expiresIn: '24h'
@@ -73,7 +73,7 @@ export class AuthService{
                     let {username, rol, id} = decoded as JwtPayload;
                     newToken = jwt.sign({username, rol, id} as JwtPayload, 
                         process.env.JWT_SECRET as string, {
-                            expiresIn: '1m'
+                            expiresIn: '1h'
                         });
                     newRefreshToken =jwt.sign({username, rol, id} as JwtPayload, 
                         process.env.JWT_REFRESH_SECRET as string,{

@@ -24,7 +24,7 @@ export class authController{
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: true,
-                maxAge: 1000 * 60
+                maxAge: 1000 * 60 * 60 * 24
             }).send({message: "Session sucessfully", token});
         }catch(err:any){
             let status:number = err.status || 403, message:string = err.message as string || 'Error'
@@ -82,7 +82,7 @@ export class authController{
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: true,
-                maxAge: 1000 * 60
+                maxAge: 1000 * 60 * 60 * 24
             }).send({message: "Session sucessfully", newToken});
 
         }catch(err:any){

@@ -103,7 +103,7 @@ export class User{
     static async getUserById(id:string | null=null):Promise<UserDto> {
         if(!id) throw new MissingParameterException("id params is required", [{field:'id', message:'id is required'}]);
         let [rows]:RowDataPacket[] = await querySql(`SELECT u.id, u.name, u.last_name,
-            u.age, u.dni, u.username, u.phone_number, r.id as rol_id,
+            u.age, u.dni, u.username, u.email, u.phone_number, r.id as rol_id,
             r.name as rol_name, a.id as address_id, a.country, a.province,
              a.city, a.house_number, a.floor
              FROM User u INNER JOIN Rol r ON u.rol_id = r.id
