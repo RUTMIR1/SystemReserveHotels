@@ -16,15 +16,15 @@ export class authController{
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: true,
+                sameSite: "lax",
                 maxAge: 1000 * 60 * 60 * 24
             })  
 
             res.cookie('access_token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: true,
-                maxAge: 1000 * 60 * 60 * 24
+                sameSite: "lax",
+                maxAge: 1000 * 60 * 60
             }).send({message: "Session sucessfully", token});
         }catch(err:any){
             let status:number = err.status || 403, message:string = err.message as string || 'Error'
@@ -74,15 +74,15 @@ export class authController{
             res.cookie('refresh_token', newRefreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: true,
+                sameSite: "lax",
                 maxAge: 1000 * 60 * 60 * 24
             })  
 
             res.cookie('access_token', newToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: true,
-                maxAge: 1000 * 60 * 60 * 24
+                sameSite: "lax",
+                maxAge: 1000 * 60 * 60
             }).send({message: "Session sucessfully", newToken});
 
         }catch(err:any){

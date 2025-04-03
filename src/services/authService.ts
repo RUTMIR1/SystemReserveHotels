@@ -62,15 +62,21 @@ export class AuthService{
                         user.address.floor]);
     }
     static async refreshTokens(tokenRefresh:string){
+            console.log("arrancamos con el metodo")
+            console.log(tokenRefresh)
             if(!tokenRefresh || typeof tokenRefresh !== 'string'){
                 throw new AuthException('not cookie for refresh cookie', [{field:'cookie', message:'not cookie for refresh cookie'}]);
             }
             let newToken:string = '', newRefreshToken:string = '';
+            console.log("pasamos la primera prueba")
             jwt.verify(tokenRefresh, process.env.JWT_REFRESH_SECRET as string, (err, decoded)=>{
                 if(err){
+                    console.log("aca hubo un error")
                     throw new AuthException('unauthorized', [{field:'token', message: 'unauthorized'}]);
                 }else{
+                    console.log("hacemos algo con refresh")
                     let {username, rol, id} = decoded as JwtPayload;
+                    console.log("!decoded! ",decoded )
                     newToken = jwt.sign({username, rol, id} as JwtPayload, 
                         process.env.JWT_SECRET as string, {
                             expiresIn: '1h'

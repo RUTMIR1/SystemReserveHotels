@@ -32,9 +32,6 @@ export const corsMiddleware = async (req:Request, res:Response, next:NextFunctio
 const validateSignature = (signature:string, requestId: string, url:string):boolean=>{
     const urlParams = new URLSearchParams(url.split('?')[1] || '');
     const dataID = urlParams.get('data.id');
-    /* const data:string[] = signature.match(/ts=(\d+),v1=([a-z0-9]+)/) as string[];
-    const ts = data[1];
-    const v1 = data[2]; */
 
     const parts = signature.split(',');
 

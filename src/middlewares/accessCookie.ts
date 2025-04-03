@@ -11,32 +11,32 @@ export const accessCookie = async (req:Request, res:Response, next:NextFunction)
     try{
         const token:string = req.cookies?.access_token;
         req.payload = {username: '', rol:'', id: ''} as SessionData;
-        if(!token || typeof token !== 'string'){
+        if(!token || typeof token !== 'string' || isTokenExpired(token, process.env.JWT_SECRET as string)){
             const tokenRefresh = req.cookies?.refresh_token;
-            if(tokenRefresh){
-                res.clearCookie('access-token');
-                res.clearCookie('refresh_token');
+            if(tokenRefresh && typeof tokenRefresh === 'string' && !isTokenExpired(tokenRefresh, process.env.JWT_REFRESH_SECRET as string)){
                 const {newToken, newRefreshToken} = await AuthService.refreshTokens(tokenRefresh);
                 res.cookie('refresh_token', newRefreshToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
-                    sameSite: true,
+                    sameSite: "lax",
                     maxAge: 1000 * 60 * 60 * 24
                 });
                 res.cookie('access_token', newToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
-                    sameSite: true,
-                    maxAge: 1000 *60
+                    sameSite: "lax",
+                    maxAge: 1000 * 60 * 60
                 });
                 const data:string | JwtPayload = jwt.verify(newRefreshToken, process.env.JWT_REFRESH_SECRET as string);
                 req.payload = data as SessionData;
                 console.log(req.payload);
                 return next();
             }else{
+                console.log("no tengo cokkie de refresh")
                 return next();
             }
         }else{
+            console.log("tengo cookie de acceso")
             const data:string | JwtPayload = jwt.verify(token, process.env.JWT_SECRET as string);
             req.payload = data as SessionData;
             console.log(req.payload);
@@ -58,5 +58,16 @@ export const authVerification = (allowed:string[]=[])=>{
         }else{
             res.status(403).json({status:403, message: 'No Permission to use'});
         }
+    }
+}
+
+const isTokenExpired = (token:string, secret:string):boolean=>{
+    try{
+        const data = jwt.verify(token, secret);
+        const d = data as SessionData;
+        if(!d.exp) return true;
+        return d.exp*1000 < Date.now();
+    }catch(err){
+        return true;
     }
 }
