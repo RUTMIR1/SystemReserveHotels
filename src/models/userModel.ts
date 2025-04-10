@@ -14,7 +14,7 @@ export class User{
         let { username ,phone_number, email, dni} =  user;
         let [rows]:RowDataPacket[] = await querySql(
             `SELECT (CASE WHEN email = ? THEN 'email' WHEN username = ?
-             THEN 'username' WHEN phone_number = ? THEN 'phone_number' WHEN dni = ? END)
+             THEN 'username' WHEN phone_number = ? THEN 'phone_number' WHEN dni = ? THEN 'dni' END)
               AS field FROM User WHERE email = ? OR username = ? OR phone_number = ? OR dni = ?
                LIMIT 1`,
             [email, username, phone_number, dni, email, username, phone_number, dni]);
@@ -53,7 +53,7 @@ export class User{
         const validationExisting:ValidationUnique = await this.validateExisting(user);
         if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
         let hashedPassword:string = await bcrypt.hash(user.password, 10);
-        let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
             , [user.name, user.last_name, user.age, user.dni, user.email, user.username,
                  hashedPassword, user.phone_number, user.rol.id
                 ,user.address.country, user.address.province, user.address.city,
@@ -94,7 +94,7 @@ export class User{
         let rolId:string | null = null;
         if(user.rol) rolId = user.rol.id;
         let [result] = await queryTransactionSql(`Call update_user(
-            ?, ? ,? ,? ,? , ?, ?, ?, ?)`, [id, user.name, user.last_name, user.age, user.dni,
+            ?, ? ,? ,? ,? , ?, ?, ?, ?, ?)`, [id, user.name, user.last_name, user.age, user.dni,
                  user.email, user.username,
                 user.password, user.phone_number, rolId]);
         return new UserDto(result[0][0]);
