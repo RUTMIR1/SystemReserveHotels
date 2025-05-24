@@ -4,30 +4,24 @@ import { CategoryType, categoryValidation, categoryValidationPartial} from '../s
 import { querySql, queryTransactionSql } from "../database.js";
 import { fieldsList, messageErrorZod } from "../utils/utils.js";
 import { RowDataPacket } from "mysql2";
-import { ValidationUnique} from "../types/validationUnique.js"
 import { MissingParameterException } from '../errors/missingParameterError.js';
 import { ValidationException } from '../errors/validationError.js';
 import { NotFoundException } from '../errors/notFoundError.js';
+import { validateUniqueFields, ValidationExisting, ValidationUnique } from '../utils/utilModel.js';
 
 export class Category{
-    static async validateUniqueFieldsCategory(category:CategoryType | Partial<CategoryType>):Promise<ValidationUnique>{
-            let {name} = category;
-            const [rows]:RowDataPacket[] = await querySql('SELECT name FROM Category WHERE name = ? LIMIT 1',
-                [name]);
-            if(rows.length > 0) return {success: false, message: `Category ${name} already exists`, field: 'name'};
-            return {success: true, message: `Rol fields correct`, field:'name'};
-        }
+
     static async getCategories():Promise<CategoryDto[]>{
-        let [rows]:RowDataPacket[] = await querySql(`SELECT id, name FROM Category`);
-        return rows.map((ca:any)=> new CategoryDto(ca));
+        const [rows]:RowDataPacket[] = await querySql(`SELECT id, name FROM Category`);
+        return rows.map((category:any)=>new CategoryDto(category))
     }
 
     static async createCategory(category:CategoryType | null=null):Promise<string>{
         if(!category) throw new MissingParameterException('category data is required', [{field:'category', message:'data is required'}]);
         const resultValidation:SafeParseReturnType<CategoryType, CategoryType> = await categoryValidation(category);
         if(!resultValidation.success) throw new ValidationException(messageErrorZod(resultValidation), fieldsList(resultValidation));
-        const resultUniqueValidation:ValidationUnique = await this.validateUniqueFieldsCategory(category);
-        if(!resultUniqueValidation.success) throw new ValidationException(resultUniqueValidation.message, [{field:resultUniqueValidation.field, message:resultUniqueValidation.message}]);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(category as any, 'Category');
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
         const [rows]:RowDataPacket[] = await querySql(`CALL insert_category(?)`, [category.name]);
         return rows[0][0].id;
     }
@@ -42,8 +36,8 @@ export class Category{
         if(rows.length === 0) throw new NotFoundException(`Category Not found for update`, [{field:'id', message:'not found'}]);
         const resultValidation:SafeParseReturnType<Partial<CategoryType>,Partial<CategoryType>> = await categoryValidationPartial(category);
         if(!resultValidation.success) throw new ValidationException(messageErrorZod(resultValidation), fieldsList(resultValidation));
-        const resultUniqueValidation:ValidationUnique = await this.validateUniqueFieldsCategory(category);
-        if(!resultUniqueValidation.success) throw new ValidationException(resultUniqueValidation.message, [{field:resultUniqueValidation.field, message:resultUniqueValidation.message}]);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(category as any, 'Category', id);
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
         let [result]:RowDataPacket[] = await querySql(`CALL update_category(?, ?)`,
             [id, category.name]);
         return result[0][0];

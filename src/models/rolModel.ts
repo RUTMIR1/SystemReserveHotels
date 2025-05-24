@@ -2,21 +2,14 @@ import { RowDataPacket } from "mysql2";
 import { querySql, queryTransactionSql } from "../database.js";
 import { RolType, rolValidation, rolValidationPartial } from "../schemas/RolSchema.js";
 import { fieldsList, messageErrorZod } from "../utils/utils.js";
-import { ValidationUnique } from "../types/validationUnique.js";
 import { RolDto } from "../dtos/RolDto.js";
 import { SafeParseReturnType } from "zod";
 import { MissingParameterException } from "../errors/missingParameterError.js";
 import { ValidationException } from "../errors/validationError.js";
 import { NotFoundException } from "../errors/notFoundError.js";
+import { validateUniqueFields, ValidationUnique } from "../utils/utilModel.js";
 
 export class Rol{
-    static async validateUniqueFieldsRol(rol:RolType | Partial<RolType>):Promise<ValidationUnique>{
-        let {name} = rol;
-        const [rows]:RowDataPacket[] = await querySql('SELECT name FROM Rol WHERE name = ? LIMIT 1',
-            [name]);
-        if(rows.length > 0) return {success: false, message: `Rol ${name} already exists`, field:'name'};
-        return {success: true, message: `Rol fields correct`, field:'OK'};
-    }
 
     static async getRols():Promise<RolDto[]>{
         const [rows]:RowDataPacket[] = await querySql('SELECT id, name FROM Rol');
@@ -27,8 +20,8 @@ export class Rol{
         if(!rol) throw new MissingParameterException('Rol data is required', [{field:'rol', message:'id is required'}]);
         const validationResult:SafeParseReturnType<RolType, RolType> = await rolValidation(rol);
         if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult), fieldsList(validationResult));
-        const uniqueFieldsresult:ValidationUnique = await this.validateUniqueFieldsRol(rol);
-        if(!uniqueFieldsresult.success) throw new ValidationException(uniqueFieldsresult.message, [{field:uniqueFieldsresult.field, message:uniqueFieldsresult.message}]);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(rol as any, 'Rol');
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
         const [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_rol(?)`, [rol.name]);
         return rows[0][0].id;
     }
@@ -40,8 +33,8 @@ export class Rol{
         if(keys.length === 0) throw new MissingParameterException('Rol fields are required', [{field:'rol', message:'not fields for update'}]);
         const validationResult:SafeParseReturnType<Partial<RolType>, Partial<RolType>> = await rolValidationPartial(rol);
         if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult), fieldsList(validationResult));
-        const uniqueFieldsResult:ValidationUnique = await this.validateUniqueFieldsRol(rol);
-        if(!uniqueFieldsResult.success) throw new ValidationException(uniqueFieldsResult.message, [{field:uniqueFieldsResult.field, message:uniqueFieldsResult.message}]);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(rol as any, 'Rol', id);
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
         let [rows]:RowDataPacket[] = await querySql('SELECT name FROM Rol WHERE id = ? LIMIT 1',[id]);
         if(rows.length === 0) throw new NotFoundException('Rol not found for update', [{field:'id', message:'not found'}]);
         let [result]:RowDataPacket[] = await queryTransactionSql('CALL update_rol(?, ?)', [id, rol.name]);

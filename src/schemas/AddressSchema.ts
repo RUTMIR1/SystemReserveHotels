@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const AddressSchema = z.object({
+   id:z.string().optional(),
    country: z.string({
      required_error: 'Address country is required',
      invalid_type_error: 'Address country mus1t be a string'

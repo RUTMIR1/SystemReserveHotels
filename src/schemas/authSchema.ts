@@ -1,6 +1,7 @@
 import z from 'zod';
 
 const authSchema = z.object({
+    id:z.string().optional(),
     username: z.string({
         required_error: 'username is required',
         invalid_type_error: 'username must be a string'

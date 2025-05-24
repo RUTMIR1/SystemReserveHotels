@@ -1,3 +1,4 @@
+import { unknown } from "zod";
 import { CategoryDto } from "./Category.js";
 
 export class RoomDto{
@@ -20,7 +21,7 @@ export class RoomDto{
             if(!categories) throw new Error("missing Room Categories");
             this.id = id;
             this.name = name;
-            this.price = price;
+            this.price = parseFloat((price as unknown) as string);
             this.description = description;
             this.image_url = image_url;
             this.state = state;

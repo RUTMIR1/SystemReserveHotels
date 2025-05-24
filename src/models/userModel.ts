@@ -3,28 +3,15 @@ import { fieldsList, messageErrorZod } from "../utils/utils.js";
 import { querySql, queryTransactionSql } from '../database.js';
 import { UserDto } from '../dtos/userDto.js';
 import { RowDataPacket } from 'mysql2';
-import { ValidationUnique } from '../types/validationUnique.js'
 import { SafeParseReturnType } from 'zod';
 import bcrypt from 'bcrypt';
 import { NotFoundException } from '../errors/notFoundError.js';
 import { MissingParameterException } from '../errors/missingParameterError.js';
 import { ValidationException } from '../errors/validationError.js'
+import { ValidationExisting, ValidationUnique, validateUniqueFields } from '../utils/utilModel.js';
 export class User{
-    static async validateUniqueFields(user:UserType | Partial<UserType>):Promise<ValidationUnique>{
-        let { username ,phone_number, email, dni} =  user;
-        let [rows]:RowDataPacket[] = await querySql(
-            `SELECT (CASE WHEN email = ? THEN 'email' WHEN username = ?
-             THEN 'username' WHEN phone_number = ? THEN 'phone_number' WHEN dni = ? THEN 'dni' END)
-              AS field FROM User WHERE email = ? OR username = ? OR phone_number = ? OR dni = ?
-               LIMIT 1`,
-            [email, username, phone_number, dni, email, username, phone_number, dni]);
-        if(rows.length > 0){
-            return {success: false, message: `User ${rows[0].field} already exists`, field:rows[0].field}
-        }
-        return {success: true, message: 'User fields correct', field:'OK'};
-    }
 
-    static async validateExisting(user:UserType | Partial<UserType>):Promise<ValidationUnique>{
+    static async validateExisting(user:UserType | Partial<UserType>):Promise<ValidationExisting>{
             if(user.rol){
                 let [RolRow]:RowDataPacket[] = await querySql(`SELECT id FROM Rol
                      WHERE id = ? LIMIT 1`, [user.rol.id]);
@@ -48,9 +35,9 @@ export class User{
         if(!user) throw new MissingParameterException('User data is required', [{field:'user', message:'data is required'}]);
         const validationResult:SafeParseReturnType<UserType, UserType> = await userValidation(user);
         if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult), fieldsList(validationResult));
-        const validationFields:ValidationUnique = await this.validateUniqueFields(user);
-        if(!validationFields.success) throw new ValidationException(validationFields.message, [{field:validationFields.field, message:validationFields.message}]);
-        const validationExisting:ValidationUnique = await this.validateExisting(user);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(user as any, 'User');
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
+        const validationExisting:ValidationExisting = await this.validateExisting(user);
         if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
         let hashedPassword:string = await bcrypt.hash(user.password, 10);
         let [rows]:RowDataPacket[] = await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -85,9 +72,9 @@ export class User{
         if(keys.length === 0) throw new MissingParameterException('No fields found for update user', [{field:'user', message:'not fields for update'}]);
         const validationResult:SafeParseReturnType<Partial<UserType>,Partial<UserType>> = await userValidationPartial(user);
         if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult), fieldsList(validationResult));
-        const validationFields:ValidationUnique = await this.validateUniqueFields(user);
-        if(!validationFields.success) throw new ValidationException(validationFields.message, [{field:validationFields.field, message:validationFields.message}]);
-        const validationExisting:ValidationUnique = await this.validateExisting(user);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(user as any, 'User', id);
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
+        const validationExisting:ValidationExisting = await this.validateExisting(user);
         if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
         let [rows]:RowDataPacket[] = await querySql('SELECT name FROM User WHERE id = ? LIMIT 1', [id]);
         if(rows.length === 0) throw new NotFoundException('Not found User for update', [{field:'id', message:'not found'}]);

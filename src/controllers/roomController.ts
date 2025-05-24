@@ -7,6 +7,7 @@ export class RoomController{
     static async getRooms(req:Request, res:Response):Promise<void>{
         try{
             let rooms:RoomDto[] = await Room.getRooms();
+            console.log(rooms);
             res.status(200).json(rooms);
         }catch(err:any){
             let status:number = err.status || 403, message:string = err.message as string || 'Error'
@@ -72,7 +73,17 @@ export class RoomController{
             res.status(status).json({status, message, data});
         }
     }
-    
+
+    static async getRoomsByState(req:Request, res:Response):Promise<void>{
+        try{
+            const rooms:RoomDto[] = await Room.getRoomsByState(req.params.state);
+            res.status(200).json(rooms);
+        }catch(err:any){
+            let status:number = err.status || 403, message:string = err.message as string || 'Error'
+            , data:ExceptionsData = err.data || [{field:'', message:''}];
+            res.status(status).json({status, message, data});
+        }
+    }
 }
 
 

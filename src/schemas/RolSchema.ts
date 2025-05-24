@@ -1,7 +1,7 @@
 import z from 'zod';
 
 const RolSchema = z.object({
-    id: z.string().uuid().optional(),
+    id:z.string().optional(),
     name: z.string({
         required_error: 'Rol name is required',
         invalid_type_error: 'Rol must be a String'

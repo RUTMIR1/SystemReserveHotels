@@ -30,7 +30,7 @@ export class ReservationDto{
                 this.check_in = new Date(check_in).toISOString().split('T')[0];
                 this.check_out = new Date(check_out).toISOString().split('T')[0];
                 this.code = code;
-                this.amount = amount;
+                this.amount = parseFloat((amount as unknown) as string);
                 this.state = state;
                 this.days = days;
                 this.user = new UserDto({id:user_id, name:name, last_name:last_name, age:age, dni:dni, email:email, 

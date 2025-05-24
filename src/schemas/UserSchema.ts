@@ -1,7 +1,7 @@
 import z from 'zod';
 import { AddressSchema } from './AddressSchema.js';
 const UserSchemaBase = z.object({
-    id: z.string().uuid().optional(),
+    id:z.string().optional(),   
     name: z.string({
         required_error: 'User name is required',
         invalid_type_error: 'User name must be a String'

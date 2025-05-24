@@ -13,7 +13,7 @@ import { UserRegisterType, userRegisterValidation } from "../schemas/UserSchema.
 import { MissingParameterException } from "../errors/missingParameterError.js";
 import { SafeParseReturnType } from "zod";
 import { User } from "../models/userModel.js";
-import { ValidationUnique } from "../types/validationUnique.js";
+import { validateUniqueFields, ValidationUnique } from "../utils/utilModel.js";
 
 dotenv.config();
 
@@ -50,12 +50,12 @@ export class AuthService{
         if(!user) throw new MissingParameterException('User data register is required', [{field:'user', message:'data is required'}]);
         const resultValidation:SafeParseReturnType<UserRegisterType, UserRegisterType> = await userRegisterValidation(user);
         if(!resultValidation.success) throw new ValidationException(messageErrorZod(resultValidation), fieldsList(resultValidation));
-        const resultUniqueValidation:ValidationUnique = await User.validateUniqueFields(user);
-        if(!resultUniqueValidation.success) throw new ValidationException(resultUniqueValidation.message, [{field:resultUniqueValidation.field, message:resultUniqueValidation.message}]);
+        const validationFields:ValidationUnique[] = await validateUniqueFields(user as any, 'User');
+        if(validationFields.length > 0) throw new ValidationException(validationFields.map(el=>el.message).join('-'), [...validationFields]);
         let hashedPassword:string = await bcrypt.hash(user.password, 10);
         const [rol]:RowDataPacket[] = await querySql(`SELECT id FROM Rol WHERE name = 'user'`);
-        await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-                    , [user.name, user.last_name, user.age, user.email, user.username,
+        await queryTransactionSql(`CALL insert_user(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                    , [user.name, user.last_name, user.age, user.dni, user.email, user.username,
                          hashedPassword, user.phone_number, rol[0].id
                         ,user.address.country, user.address.province, user.address.city,
                          user.address.house_number,

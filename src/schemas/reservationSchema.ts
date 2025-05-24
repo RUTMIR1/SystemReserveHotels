@@ -1,10 +1,13 @@
 import z, { string, ZodIssue } from 'zod';
 import { querySql } from '../database.js';
 import { RowDataPacket } from 'mysql2';
+import { RoomSchema } from './RoomSchema.js';
+import { UserSchema } from './UserSchema.js';
 
 const dateRegex:RegExp = /^\d{4}-\d{2}-\d{2}$/;
 
 const BaseReservationSchema = z.object({
+    id:z.string().optional(),
     reservation_date_start: z.string({
         required_error: 'reservation_date_start is required',
         invalid_type_error: 'reservation_date_start must be a string'
@@ -56,7 +59,7 @@ const BaseReservationSchema = z.object({
     amount: z.number({
         required_error: 'amount is required',
         invalid_type_error: 'amount must be a number'
-    }).positive({ message: 'Amount must be positive' }).optional(),
+    }).positive({ message: 'Amount must be positive' }),
     days: z.number({
         required_error: 'days is required',
         invalid_type_error: 'days must be a number'
@@ -68,18 +71,38 @@ const BaseReservationSchema = z.object({
         invalid_type_error: 'state must be a string',
     }).optional(),
     user: z.object({
+        id:z.string({
+            required_error: 'User id is required',
+            invalid_type_error: 'User id must be a string'
+        }).uuid({message:'User id must be in UUID format'})
+    }),
+    room: z.object({
+        id:z.string({
+            required_error:'Room id is required',
+            invalid_type_error:'Room id must be a string'
+        }).uuid({message:'User id must be in UUID format'})
+    })
+});
+
+/**
+ *  user: z.object({
         id: z.string({
             required_error: 'user id is required',
             invalid_type_error: 'user id must be a string'
         }).uuid({ message: 'User ID must be a UUID string' })
     }),
-    room: z.object({
+ * z.enum(['finalized', 'current', 'canceled'], {
+        required_error: 'state is required',
+        invalid_type_error: 'state must be a string',
+    }).optional()
+ * 
+ * z.object({
         id: z.string({
             required_error: 'room id is required',
             invalid_type_error: 'room id must be a string'
         }).uuid({ message: 'Room ID must be a UUID string' })
     })
-});
+ */
 
 export const ReservationSchema = BaseReservationSchema.superRefine((data, ctx) => {
     if(data.reservation_date_end && data.reservation_date_start && data.check_in && data.check_out){

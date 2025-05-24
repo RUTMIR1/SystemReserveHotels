@@ -3,6 +3,10 @@ import { Connection } from 'mysql2/promise';
 import bcrypt from 'bcrypt';
 import { ExceptionsData } from '../types/exceptionsData.js';
 
+export const calculatePriceReserve =(days:number, priceRoom:number)=>{
+    return days * priceRoom;
+}
+
 export const createCodeReservation = (codeFormat:string):string =>{
     let codes:RegExpMatchArray | null = codeFormat.match(/\d+/g);
     let numCode:string = '';
@@ -66,6 +70,6 @@ export const insertUsers = async (connection:Connection):Promise<void>=>{
         INSERT INTO Reservation (id, reservation_date_start, reservation_date_end, check_in, 
 check_out, code, amount, state, days, user_id, room_id) VALUES(
     '123e4567-e89b-12d3-a456-426655440000', '2025-01-01', '2025-03-03', '2025-02-02',
-    '2025-02-08', 'CODE0001', 1000000.00, 'current', 62, '431d6c93-e1f4-11ef-8f63-0242ac130002',
+    '2025-02-08', 'CODE00001', 1000000.00, 'current', 62, '431d6c93-e1f4-11ef-8f63-0242ac130002',
     'd4b522f1-e3a4-11ef-8f63-0242ac130002')`)
 }

@@ -11,9 +11,9 @@ CREATE TABLE Room(
 );#
 
 INSERT INTO Room (id, name, price, description, image_url, state) VALUES
-    ('d4b522f1-e3a4-11ef-8f63-0242ac130002','Room1', 25.00, 'A spacious, elegant room with a king-sized bed and a full-size bathroom.',
-    'https://example.com/deluxe-room-image.jpg', 'active'),
-    ('d4b526ac-e3a4-11ef-8f63-0242ac130002','Room2', 100.00, 'A cozy, comfortable room with a queen-sized bed and a small bathroom.',
+    ('d4b522f1-e3a4-11ef-8f63-0242ac130002','Room1', 25.25, 'A spacious, elegant room with a king-sized bed and a full-size bathroom.',
+    'https://example.com/deluxe-room-image.jpg', 'reserved'),
+    ('d4b526ac-e3a4-11ef-8f63-0242ac130002','Room2', 100.40, 'A cozy, comfortable room with a queen-sized bed and a small bathroom.',
     'https://example.com/standard-room-image.jpg', 'active');#
 
 DROP PROCEDURE IF EXISTS insert_room;#
@@ -68,7 +68,6 @@ BEGIN
     image_url = COALESCE(p_image_url, image_url),
     state = COALESCE(p_state, state)
     WHERE id = p_id;
-
     IF p_categories IS NOT NULL THEN
         DELETE FROM RoomCategory rc WHERE rc.room_id = p_id; 
         SET c_length = JSON_LENGTH(p_categories);

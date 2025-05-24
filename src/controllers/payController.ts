@@ -24,11 +24,11 @@ export class PayController{
                 console.log(data);
                 if(data.status === 'approved'){
                     console.log("se ejecuta lo segundo --")
-                    let {reservation} = data.metadata;
-                    console.log(reservation);
-                    await Reservation.generateReservationPaid(reservation);
+                    let {preference} = data.metadata;
+                    console.log(preference);
+                    await Reservation.generateReservationPaid(preference);
                     console.log("se guarda reservacion!");
-                    await Room.updateRoom(reservation.room.id, {state:'reserved'});
+                    await Room.updateRoom(preference.room_id, {state:'reserved'});
                     console.log("se cambia estado de habitacion");
                 }
             }

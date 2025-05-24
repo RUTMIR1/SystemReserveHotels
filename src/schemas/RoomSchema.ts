@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const RoomSchema = z.object({
+    id:z.string().optional(),
     name: z.string({
         required_error: 'Room name is required',
         invalid_type_error: 'Room name must be a String'

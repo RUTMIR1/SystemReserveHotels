@@ -5,12 +5,11 @@ import { randomUUID } from 'crypto';
 import { MissingParameterException } from '../errors/missingParameterError.js';
 import { querySql } from '../database.js';
 import { PaymentException } from '../errors/paymentError.js';
-import { reservationValidation, ReservationType } from '../schemas/reservationSchema.js';
-import { ValidationUnique } from '../types/validationUnique.js';
 import { SafeParseReturnType } from 'zod';
 import { ValidationException } from '../errors/validationError.js';
-import { fieldsList, messageErrorZod } from '../utils/utils.js';
-import { Reservation } from '../models/reservationModel.js';
+import { calculatePriceReserve, fieldsList, messageErrorZod } from '../utils/utils.js';
+import { PreferenceType, PreferenceValidation } from '../schemas/referenceSchema.js';
+
 
 dotenv.config();
 const token = process.env.MERCADOPAGO_ACCESS_TOKEN as string;
@@ -19,27 +18,31 @@ const client = new MercadoPagoConfig({
 })
 
 export class MercadoPagoService{
-    static async createPreference(reservation:ReservationType):Promise<PreferenceResponse>{
-        if(!reservation) throw new MissingParameterException('Reservation data is required', [{field:'reservation', message:'data is required'}]);
-        const validationResult:SafeParseReturnType<ReservationType, ReservationType> = await reservationValidation(reservation);
+    static async createPreference(preferenceParameter:PreferenceType):Promise<PreferenceResponse>{
+        if(!preferenceParameter) throw new MissingParameterException('preferenceParameter data is required', [{field:'preferenceParameter', message:'referense is required'}]);
+        const validationResult:SafeParseReturnType<PreferenceType, PreferenceType> = await PreferenceValidation(preferenceParameter);
         if(!validationResult.success) throw new ValidationException(messageErrorZod(validationResult), fieldsList(validationResult));
-        const validationExisting:ValidationUnique = await Reservation.validateExisting(reservation);
-        if(!validationExisting.success) throw new ValidationException(validationExisting.message, [{field:validationExisting.field, message:validationExisting.message}]);
-        const [rows] = await querySql(`SELECT id, price, name from Room WHERE id = ? LIMIT 1`, [reservation.room.id]);
+        const [user] = await querySql(`SELECT id from User where id = ? LIMIT 1`, [preferenceParameter.user_id]);
+        if(user.length === 0) throw new ValidationException('User does not exits', [{field:'id', message:'User does not exits'}]);
+        const [rows] = await querySql(`SELECT id, price, name from Room WHERE id = ? LIMIT 1`, [preferenceParameter.room_id]);
+        if(rows.length === 0) throw new ValidationException('Room does not exits', [{field:'id', message:'Room does not exits'}]);
         const preference = new Preference(client);
         let preferenceId = randomUUID();
         const response = await preference.create({body:{
             items: [
                 {   
-                    unit_price: parseFloat(rows[0].price),
+                    unit_price: calculatePriceReserve(preferenceParameter.days, rows[0].price),
                     id:preferenceId,
                     title: rows[0].name,
                     quantity: 1,
                 },
             ],
-            notification_url:"https://f0dc-2803-cf00-7fd-d700-f5b7-3f51-21a5-28bf.ngrok-free.app/Pay/webhook?source_news=webhooks",
+            back_urls:{
+                success:preferenceParameter.success_url,
+            },
+            notification_url:"https://7ff4-2803-cf00-7fd-d700-156c-650d-da4b-1f1c.ngrok-free.app/Pay/webhook?source_news=webhooks",
             metadata:{
-                reservation
+                preference:preferenceParameter
             }
         }});
         return response; 
